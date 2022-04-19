@@ -1,4 +1,4 @@
-package ru.vat78.notes.core
+package ru.vat78.notes.core.api
 
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni

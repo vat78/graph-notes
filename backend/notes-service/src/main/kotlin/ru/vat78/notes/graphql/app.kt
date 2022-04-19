@@ -1,8 +1,7 @@
 package ru.vat78.notes.graphql
 
 import org.eclipse.microprofile.graphql.*
-import ru.vat78.notes.core.Note
-import ru.vat78.notes.core.NoteService
+import ru.vat78.notes.core.api.*
 import javax.inject.Inject
 
 @GraphQLApi

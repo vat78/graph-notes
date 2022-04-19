@@ -1,7 +1,8 @@
-package ru.vat78.notes.core
+package ru.vat78.notes.core.storage
 
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
+import ru.vat78.notes.core.api.Note
 import javax.enterprise.context.ApplicationScoped
 
 internal interface NoteStorage {
