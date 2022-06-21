@@ -1,13 +1,15 @@
 package ru.vat78.notes.core.api
 
 import io.smallrye.mutiny.Multi
-import io.smallrye.mutiny.Uni
-import java.util.UUID
+import java.util.*
 import javax.json.bind.annotation.JsonbCreator
 import javax.json.bind.annotation.JsonbProperty
 
 enum class NoteType(val tag: Boolean, val hierarchy: Boolean) {
-    COMMON(false, false)
+    COMMON(false, false),
+    DATE(false, false),
+    USER(true, false),
+    PERSON(true, false)
 }
 
 class Note @JsonbCreator constructor (
@@ -23,7 +25,7 @@ class Note @JsonbCreator constructor (
 }
 
 interface NoteService {
-    fun save(note: Note) : Uni<Note>
+    fun save(note: Note) : Multi<Note>
     fun findByCaption(caption: String): Multi<Note>
 }
 

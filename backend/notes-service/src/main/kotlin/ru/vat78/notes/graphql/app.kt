@@ -10,7 +10,7 @@ class ApplicationEndpoint(@Inject val coreNotes: NoteService) {
     @Mutation("saveNote")
     @Description("Common way to save Note")
     fun saveCoreNote(note: Note) : Note {
-        return coreNotes.save(note).log().await().indefinitely()
+        return coreNotes.save(note).collect().asList().map { it[0] }.log().await().indefinitely()
     }
 
     @Query("findByCaption")
