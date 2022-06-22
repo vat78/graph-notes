@@ -1,6 +1,7 @@
 package ru.vat78.notes.core.api
 
 import io.smallrye.mutiny.Multi
+import io.smallrye.mutiny.Uni
 import java.util.*
 import javax.json.bind.annotation.JsonbCreator
 import javax.json.bind.annotation.JsonbProperty
@@ -25,7 +26,7 @@ class Note @JsonbCreator constructor (
 }
 
 interface NoteService {
-    fun save(note: Note) : Multi<Note>
+    fun save(note: Note) : Uni<Note>
     fun findByCaption(caption: String): Multi<Note>
 }
 

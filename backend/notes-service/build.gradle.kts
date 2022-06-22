@@ -23,6 +23,7 @@ dependencies {
     implementation("org.liquibase.ext:liquibase-neo4j:4.9.1")
 
     testImplementation("io.quarkus:quarkus-junit5")
+    testImplementation("io.quarkus:quarkus-junit5-mockito")
     testImplementation("io.rest-assured:rest-assured")
 }
 

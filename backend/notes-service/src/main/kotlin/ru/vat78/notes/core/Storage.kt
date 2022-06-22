@@ -11,41 +11,17 @@ import ru.vat78.notes.core.api.Note
 import ru.vat78.notes.core.api.NoteType
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
-import javax.inject.Qualifier
 
 internal interface NoteStorage {
-    fun save(note: Note) : Multi<Note>
+    fun save(note: Note) : Uni<Note>
     fun findByCaption(caption: String) : Multi<Note>
 }
 
-@Qualifier
-annotation class MainDB
-
-@ApplicationScoped
-internal class StubNoteStorage : NoteStorage {
-    val storage : MutableList<Note> = mutableListOf()
-
-    override fun save(note: Note): Multi<Note> {
-        return Multi.createFrom().item(note).invoke { n ->
-            storage.add(n)
-            n
-        }
-    }
-
-    override fun findByCaption(caption: String): Multi<Note> {
-        return Uni.createFrom().item(caption)
-            .onItem()
-            .transformToMulti { c -> Multi.createFrom().iterable(
-                storage.filter { it.caption.contains(c, ignoreCase = true) }) }
-    }
-}
-
-@MainDB
 @ApplicationScoped
 internal class Neo4JStorage(@Inject val driver: Driver) : NoteStorage {
     private val log: Logger = Logger.getLogger(javaClass)
 
-    override fun save(note: Note): Multi<Note> {
+    override fun save(note: Note): Uni<Note> {
         val outputResource = Multi.createFrom().resource(driver::rxSession) {
             it.writeTransaction { tr ->
                 val result = tr.run(
@@ -54,10 +30,9 @@ internal class Neo4JStorage(@Inject val driver: Driver) : NoteStorage {
                 )
                 Multi.createFrom().publisher(result.records())
                     .map(this::buildNoteFromRecord)
-                    .select().first()
             }
         }
-        return outputResource.withFinalizer(this::closeSession)
+        return outputResource.withFinalizer(this::closeSession).collect().first()
     }
 
     override fun findByCaption(caption: String): Multi<Note> {

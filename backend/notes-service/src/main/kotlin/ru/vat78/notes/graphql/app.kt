@@ -1,7 +1,8 @@
 package ru.vat78.notes.graphql
 
 import org.eclipse.microprofile.graphql.*
-import ru.vat78.notes.core.api.*
+import ru.vat78.notes.core.api.Note
+import ru.vat78.notes.core.api.NoteService
 import javax.inject.Inject
 
 @GraphQLApi
@@ -10,7 +11,7 @@ class ApplicationEndpoint(@Inject val coreNotes: NoteService) {
     @Mutation("saveNote")
     @Description("Common way to save Note")
     fun saveCoreNote(note: Note) : Note {
-        return coreNotes.save(note).collect().asList().map { it[0] }.log().await().indefinitely()
+        return coreNotes.save(note).log().await().indefinitely()
     }
 
     @Query("findByCaption")
