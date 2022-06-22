@@ -13,10 +13,17 @@ dependencies {
 
     implementation(enforcedPlatform("io.quarkus:quarkus-bom:$quarkusVersion"))
     implementation("io.quarkus:quarkus-kotlin")
-    implementation("io.quarkus:quarkus-resteasy-reactive")
-    implementation("io.quarkus:quarkus-resteasy-reactive-jackson")
+    implementation("io.quarkus:quarkus-smallrye-graphql")
+    implementation("io.quarkus:quarkus-resteasy")
+    implementation("io.quarkus:quarkus-resteasy-jackson")
+
+    implementation("io.quarkiverse.neo4j:quarkus-neo4j:1.3.0")
+
+    implementation("io.quarkus:quarkus-liquibase")
+    implementation("org.liquibase.ext:liquibase-neo4j:4.9.1")
 
     testImplementation("io.quarkus:quarkus-junit5")
+    testImplementation("io.quarkus:quarkus-junit5-mockito")
     testImplementation("io.rest-assured:rest-assured")
 }
 
