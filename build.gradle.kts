@@ -22,7 +22,7 @@ subprojects{
         classDirectories.setFrom(
             files(classDirectories.files.map {
                 fileTree(it) {
-                    exclude("**/core/Storage.kt")
+                    exclude("ru/vat78/notes/core/storage/**")
                 }
             })
         )
