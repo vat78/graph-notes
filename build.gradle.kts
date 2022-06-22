@@ -19,12 +19,5 @@ subprojects{
         dependsOn.add(tasks.getByName("test"))
         reports.xml.required.set(true)
         reports.html.required.set(true)
-        classDirectories.setFrom(
-            files(classDirectories.files.map {
-                fileTree(it) {
-                    exclude("ru/vat78/notes/core/storage/**")
-                }
-            })
-        )
     }
 }
