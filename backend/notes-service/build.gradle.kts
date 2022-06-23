@@ -1,7 +1,9 @@
 plugins {
+    java
     kotlin("jvm")
     kotlin("plugin.allopen")
     id("io.quarkus")
+    jacoco
 }
 
 version = "1.0-SNAPSHOT"
@@ -43,4 +45,14 @@ allOpen {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
     kotlinOptions.javaParameters = true
+}
+
+tasks.named<Test>("test") {
+    finalizedBy(tasks.getByName("jacocoTestReport")) // report is always generated after tests run
+}
+
+tasks.named<JacocoReport>("jacocoTestReport") {
+    dependsOn.add(tasks.getByName("test"))
+    reports.xml.required.set(true)
+    reports.html.required.set(true)
 }
