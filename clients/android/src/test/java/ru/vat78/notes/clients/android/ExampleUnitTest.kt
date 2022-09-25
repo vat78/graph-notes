@@ -1,4 +1,4 @@
-package ru.vat78.notes.clients
+package ru.vat78.notes.clients.android
 
 import org.junit.Test
 

@@ -27,10 +27,10 @@ pluginManagement{
 
         // Quarkus
         id("io.quarkus") version "quarkus".getVersion()
-        id("com.android.application") version "7.2.0"
 
         // Android
-        id("org.jetbrains.kotlin.android") version "1.7.10"
+        id("org.jetbrains.kotlin.android") version "kotlin".getVersion()
+        id("com.android.application") version "7.2.2"
     }
 }
 

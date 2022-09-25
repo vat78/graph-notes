@@ -1,12 +1,10 @@
-package ru.vat78.notes.clients
+package ru.vat78.notes.clients.android
 
-import android.support.test.InstrumentationRegistry
-import android.support.test.runner.AndroidJUnit4
-
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-
-import org.junit.Assert.*
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -19,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("ru.vat78.notes.clients", appContext.packageName)
+        assertEquals("ru.vat78.notes.clients.android", appContext.packageName)
     }
 }
