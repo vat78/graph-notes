@@ -16,4 +16,8 @@ class GraphDataRepository {
 
     val tasks: List<Task>
         get() = _tasks
+
+    fun taskByUuid(uuid: String) : Task? {
+        return _tasks.find { it.uuid == uuid }
+    }
 }

@@ -10,9 +10,10 @@
             android:supportsRtl="true"
             android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
-                android:name=".tasks.TasksActivity"
+                android:name=".ui.GraphNotesActivity"
                 android:exported="true"
-                android:label="@string/title_activity_tasks">
+                android:windowSoftInputMode="adjustResize"
+                android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
