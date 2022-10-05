@@ -18,19 +18,23 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ru.vat78.notes.clients.android.data.TaskShortView
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 import java.time.LocalDate
 
 @Composable
 fun TasksScreen(
-    onTaskClick: (Task) -> Unit,
+    onTaskClick: (TaskShortView) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TasksViewModel = viewModel()
 ) {
@@ -40,8 +44,8 @@ fun TasksScreen(
 }
 
 @Composable
-fun TaskList(onTaskClick: (Task) -> Unit, viewModel: TasksViewModel, modifier: Modifier = Modifier) {
-    val tasks: List<Task> = viewModel.tasks
+fun TaskList(onTaskClick: (TaskShortView) -> Unit, viewModel: TasksViewModel, modifier: Modifier = Modifier) {
+    val tasks by viewModel.tasks.collectAsState()
     LazyColumn(modifier = modifier) {
         items(tasks.size) {
             TaskCard(tasks[it], onTaskClick, modifier)
@@ -50,8 +54,7 @@ fun TaskList(onTaskClick: (Task) -> Unit, viewModel: TasksViewModel, modifier: M
 }
 
 @Composable
-fun TaskCard(task: Task, onClick: (Task) -> Unit, modifier: Modifier = Modifier) {
-
+fun TaskCard(task: TaskShortView, onClick: (TaskShortView) -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.padding(all = 4.dp)
             .fillMaxWidth()
@@ -84,7 +87,9 @@ fun TaskCard(task: Task, onClick: (Task) -> Unit, modifier: Modifier = Modifier)
                 Text(
                     text = task.caption,
                     modifier = modifier.padding(all = 4.dp),
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.body2,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -113,7 +118,7 @@ fun PreviewMessageCard() {
     GraphNotesTheme {
         Surface {
             TaskCard(
-                task = Task(
+                task = TaskShortView(
                     LocalDate.now().plusDays(6),
                     "Take a look at Jetpack Compose, it's great!",
                     Color.Transparent

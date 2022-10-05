@@ -22,8 +22,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import ru.vat78.notes.clients.android.data.TaskShortView
 import ru.vat78.notes.clients.android.tasks.SingleTaskScreen
-import ru.vat78.notes.clients.android.tasks.Task
 import ru.vat78.notes.clients.android.tasks.TasksScreen
 
 @Composable
@@ -49,7 +49,10 @@ fun GraphNotesNavHost(
         ) { navBackStackEntry ->
             val taskUuid =
                 navBackStackEntry.arguments?.getString(SingleTask.uuid)
-            SingleTaskScreen(taskUuid.orEmpty())
+            SingleTaskScreen(
+                taskUuid.orEmpty(),
+                onClose = {navController.popBackStack()}
+            )
         }
     }
 }
@@ -71,6 +74,6 @@ fun NavHostController.navigateSingleTopTo(route: String) =
         restoreState = true
     }
 
-private fun NavHostController.navigateToSingleTask(task: Task) {
+private fun NavHostController.navigateToSingleTask(task: TaskShortView) {
     this.navigateSingleTopTo("${SingleTask.route}/${task.uuid}")
 }
