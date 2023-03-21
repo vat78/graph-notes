@@ -4,5 +4,5 @@ allprojects {
 version = "1.0-SNAPSHOT"
 
 plugins {
-    id("org.sonarqube") version "3.3"
+    alias(libs.plugins.sonarqube)
 }
