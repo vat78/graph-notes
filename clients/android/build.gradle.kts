@@ -46,11 +46,13 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.lifecycle.viewModelCompose)
+    implementation(libs.androidx.compose.ui.googlefonts)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.runner)

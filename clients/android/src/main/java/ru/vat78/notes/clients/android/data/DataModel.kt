@@ -1,5 +1,6 @@
 package ru.vat78.notes.clients.android.data
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -15,6 +16,7 @@ data class Tag(
     val color: Color
 )
 
+@Immutable
 data class Event(
     val type: NoteType,
     val description: String,
@@ -36,5 +38,16 @@ data class TaskDetails(
     val description: String = "",
     val color: Color = Color.Transparent,
     val uuid: String = UUID.randomUUID().toString(),
+)
+
+@Immutable
+data class Note(
+    val uuid: UUID = UUID.randomUUID(),
+    val caption: String,
+    val type: String = NoteType.NOTE.toString(),
+    val color: Color = Color.Transparent,
+    val description: String = "",
+    val start: LocalDateTime = LocalDateTime.now(),
+    val finish: LocalDateTime = LocalDateTime.now()
 )
 
