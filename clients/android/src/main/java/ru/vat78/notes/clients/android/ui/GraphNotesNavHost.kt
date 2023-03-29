@@ -23,6 +23,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import ru.vat78.notes.clients.android.data.TaskShortView
+import ru.vat78.notes.clients.android.notes.NoteListContent
+import ru.vat78.notes.clients.android.notes.NotesViewModel
 import ru.vat78.notes.clients.android.tasks.SingleTaskScreen
 import ru.vat78.notes.clients.android.tasks.TasksScreen
 
@@ -33,9 +35,14 @@ fun GraphNotesNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Tasks.route,
+        startDestination = NoteListScreen.route,
         modifier = modifier
     ) {
+        composable(route = NoteListScreen.route) {
+            NoteListContent(
+                viewModel = NotesViewModel(),
+            )
+        }
         composable(route = Tasks.route) {
             TasksScreen(
                 onTaskClick = { task ->

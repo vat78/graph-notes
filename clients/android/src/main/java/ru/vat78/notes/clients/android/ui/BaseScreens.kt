@@ -11,7 +11,7 @@ interface BaseScreen {
     val route: String
 }
 
-val appBaseScreens = listOf(Tasks)
+val appBaseScreens = listOf(NoteListScreen)
 
 object Tasks: BaseScreen {
     override val icon = Icons.Filled.Check
@@ -26,4 +26,9 @@ object SingleTask: BaseScreen {
     val arguments = listOf(
         navArgument(uuid) { type = NavType.StringType}
     )
+}
+
+object NoteListScreen: BaseScreen {
+    override val icon = Icons.Filled.Check
+    override val route = "notes"
 }

@@ -21,7 +21,7 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,12 +43,12 @@ private enum class Visibility {
  * taken from https://github.com/android/compose-samples/tree/main/Jetchat
  */
 @Composable
-fun JumpToBottom(
+fun JumpToBegin(
     enabled: Boolean,
     onClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Show Jump to Bottom button
+    // Show Jump to Begin button
     val transition = updateTransition(
         if (enabled) Visibility.VISIBLE else Visibility.GONE,
         label = "JumpToBottom visibility animation"
@@ -64,13 +64,13 @@ fun JumpToBottom(
         ExtendedFloatingActionButton(
             icon = {
                 Icon(
-                    imageVector = Icons.Filled.ArrowDownward,
+                    imageVector = Icons.Filled.ArrowUpward,
                     modifier = Modifier.height(18.dp),
                     contentDescription = null
                 )
             },
             text = {
-                Text(text = stringResource(id = R.string.jumpBottom))
+                Text(text = stringResource(id = R.string.jump_to_begin))
             },
             onClick = onClicked,
             containerColor = MaterialTheme.colorScheme.surface,
@@ -84,6 +84,6 @@ fun JumpToBottom(
 
 @Preview
 @Composable
-fun JumpToBottomPreview() {
-    JumpToBottom(enabled = true, onClicked = {})
+fun JumpToBeginPreview() {
+    JumpToBegin(enabled = true, onClicked = {})
 }

@@ -1,7 +1,7 @@
 package ru.vat78.notes.clients.android.notes
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -21,8 +22,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,6 +35,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,16 +45,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.ui.components.FunctionalityNotAvailablePopup
 import ru.vat78.notes.clients.android.ui.components.InfoIcon
-import ru.vat78.notes.clients.android.ui.components.JumpToBottom
+import ru.vat78.notes.clients.android.ui.components.JumpToBegin
 import ru.vat78.notes.clients.android.ui.components.NotesAppBar
 import ru.vat78.notes.clients.android.ui.components.SearchIcon
 import ru.vat78.notes.clients.android.ui.components.SymbolAnnotationType
@@ -63,11 +71,12 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteListContent(
-    uiState: NotesUiState,
+    viewModel: NotesViewModel,
     modifier: Modifier = Modifier,
     onNavIconPressed: () -> Unit = { }
 ) {
 
+    val uiState by viewModel.state.collectAsState()
     val scrollState = rememberLazyListState()
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
@@ -87,9 +96,7 @@ fun NoteListContent(
                 )
                 SmallNoteEditor(
                     onEventInput = { content ->
-                        uiState.addNote(
-                            Note(caption = content)
-                        )
+                        viewModel.sendEvent(NotesUiEvent.CreateNote(content))
                     },
                     resetScroll = {
                         scope.launch {
@@ -191,7 +198,7 @@ fun Notes(
                         scrollState.firstVisibleItemScrollOffset > jumpThreshold
             }
         }
-        JumpToBottom(
+        JumpToBegin(
             // Only show if the scroller is not at the bottom
             enabled = jumpToBottomButtonEnabled,
             onClicked = {
@@ -209,35 +216,75 @@ fun NoteShort(
     caption: String,
     description: String,
     time: LocalDateTime,
+    icon: ImageVector = Icons.Filled.Info,
     color: Color = MaterialTheme.colorScheme.tertiary
 ) {
     val uriHandler = LocalUriHandler.current
 
-    val text = if (description.length == 0) "*$caption*" else "*$caption*${System.lineSeparator()}$description"
-    val cutText = if (text.length > 150) text.format().substring(0, 150) + "..." else text.format()
-    val styledMessage = messageFormatter(cutText)
-    Column {
+    val styledMessage = messageFormatter(description)
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
         Surface(
             color = color,
-            shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 20.dp)
+            shape = RoundedCornerShape(8.dp, 8.dp, 8.dp, 8.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            ClickableText(
-                text = styledMessage,
-                style = MaterialTheme.typography.bodyLarge.copy(color = LocalContentColor.current),
-                modifier = Modifier.padding(16.dp),
-                onClick = {
-                    styledMessage
-                        .getStringAnnotations(start = it, end = it)
-                        .firstOrNull()
-                        ?.let { annotation ->
-                            when (annotation.tag) {
-                                SymbolAnnotationType.LINK.name -> uriHandler.openUri(annotation.item)
-                                SymbolAnnotationType.TAG.name -> {}
-                                else -> Unit
-                            }
+            Column {
+                Row (modifier = Modifier.fillMaxWidth()) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(start = 8.dp, top = 8.dp)
+                            .height(18.dp)
+                    )
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = caption,
+                            maxLines = 1,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                color = LocalContentColor.current,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        Surface (
+                            color = color,
+                            modifier = Modifier.align(Alignment.TopEnd)
+                        ) {
+                            Text(
+                                text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = LocalContentColor.current,
+                                    fontStyle = FontStyle.Italic
+                                ),
+                                modifier = Modifier.padding(8.dp)
+                            )
                         }
+                    }
                 }
-            )
+                if (description.isNotBlank()) {
+                    ClickableText(
+                        text = styledMessage,
+                        maxLines = 4,
+                        style = MaterialTheme.typography.bodyMedium.copy(color = LocalContentColor.current),
+                        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
+                        onClick = {
+                            styledMessage
+                                .getStringAnnotations(start = it, end = it)
+                                .firstOrNull()
+                                ?.let { annotation ->
+                                    when (annotation.tag) {
+                                        SymbolAnnotationType.LINK.name -> uriHandler.openUri(annotation.item)
+                                        SymbolAnnotationType.TAG.name -> {}
+                                        else -> Unit
+                                    }
+                                }
+                        }
+                    )
+                }
+            }
         }
     }
     Spacer(modifier = Modifier.height(4.dp))
@@ -274,24 +321,13 @@ private fun RowScope.DayHeaderLine() {
 
 private val JumpToBottomThreshold = 56.dp
 
-private fun ScrollState.atBottom(): Boolean = value == 0
-
 
 @Preview
 @Composable
 fun NotesPreview() {
     GraphNotesTheme {
         NoteListContent(
-            uiState = NotesUiState(
-                caption = "Test",
-                initialNotes = listOf(
-                    Note(caption = "test 4", start = LocalDateTime.of(2023, 3, 22, 18, 0)),
-                    Note(caption = "test 3", start = LocalDateTime.of(2023, 3, 22, 18, 55), description = "dlfak *vblmafbvmf afbmafdbma* abfdbbadabd"),
-                    Note(caption = "test formatted", start = LocalDateTime.of(2023, 3, 23, 18, 55), description = "shfsh ;ljrg sdfbgsn @test fl;cvbmvcx fdsdfblmkb sbksdlkb sbnlskdgb dsklbnlksdbn  sdfbldskblksd dsbkmdsblksm sdfkblmskldbm sdbmsldkbm  sdmbflkdsmbsl dsbmlkdsmb sdbklmsldkbms sdmflbsld"),
-                    Note(caption = "test 2"),
-                    Note(caption = "test 1")
-                )
-            )
+            viewModel = NotesViewModel()
         )
     }
 }
