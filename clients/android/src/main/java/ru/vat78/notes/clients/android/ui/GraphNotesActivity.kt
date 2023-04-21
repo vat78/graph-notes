@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
+import ru.vat78.notes.clients.android.data.NotesStorage
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 
 class GraphNotesActivity : ComponentActivity() {
@@ -34,7 +35,8 @@ fun GraphNotesApp() {
         Scaffold { innerPadding ->
             GraphNotesNavHost(
                 navController = navController,
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.padding(innerPadding),
+                noteStorage = NotesStorage()
             )
         }
     }

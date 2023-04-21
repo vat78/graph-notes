@@ -1,5 +1,6 @@
 package ru.vat78.notes.clients.android.notes
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.data.NoteType
+import ru.vat78.notes.clients.android.data.NotesStorage
 import ru.vat78.notes.clients.android.ui.components.FunctionalityNotAvailablePopup
 import ru.vat78.notes.clients.android.ui.components.InfoIcon
 import ru.vat78.notes.clients.android.ui.components.JumpToBegin
@@ -73,7 +76,9 @@ import java.util.*
 fun NoteListContent(
     viewModel: NotesViewModel,
     modifier: Modifier = Modifier,
-    onNavIconPressed: () -> Unit = { }
+    onNavIconPressed: () -> Unit = { },
+    onNoteClick: (String) -> Unit = { },
+    onCreateNote: () -> Unit = { },
 ) {
 
     val uiState by viewModel.state.collectAsState()
@@ -81,6 +86,8 @@ fun NoteListContent(
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
     val scope = rememberCoroutineScope()
+
+    viewModel.sendEvent(NotesUiEvent.LoadNotes(null))
 
     Surface(modifier = modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -92,11 +99,13 @@ fun NoteListContent(
                 Notes(
                     uiState.notes,
                     modifier = Modifier.weight(1f),
-                    scrollState = scrollState
+                    scrollState = scrollState,
+                    onNoteClick = onNoteClick
                 )
                 SmallNoteEditor(
                     onEventInput = { content ->
-                        viewModel.sendEvent(NotesUiEvent.CreateNote(content))
+                        viewModel.sendEvent(NotesUiEvent.CreateNote(NoteType.NOTE, content))
+                        onCreateNote()
                     },
                     resetScroll = {
                         scope.launch {
@@ -155,7 +164,8 @@ fun NotesTopBar(
 fun Notes(
     notes: List<Note>,
     scrollState: LazyListState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNoteClick: (String) -> Unit = { },
 ) {
     val scope = rememberCoroutineScope()
     Box(modifier = modifier) {
@@ -180,9 +190,11 @@ fun Notes(
 
                 item {
                     NoteShort(
+                        uuid = content.uuid,
                         caption = content.caption,
                         description = content.description,
-                        time = content.start
+                        time = content.start,
+                        onNoteClick = onNoteClick
                     )
                 }
             }
@@ -213,11 +225,13 @@ fun Notes(
 
 @Composable
 fun NoteShort(
+    uuid: String,
     caption: String,
     description: String,
     time: LocalDateTime,
     icon: ImageVector = Icons.Filled.Info,
-    color: Color = MaterialTheme.colorScheme.tertiary
+    color: Color = MaterialTheme.colorScheme.tertiary,
+    onNoteClick: (String) -> Unit = { }
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -228,7 +242,7 @@ fun NoteShort(
         Surface(
             color = color,
             shape = RoundedCornerShape(8.dp, 8.dp, 8.dp, 8.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().clickable { onNoteClick(uuid) }
         ) {
             Column {
                 Row (modifier = Modifier.fillMaxWidth()) {
@@ -327,7 +341,7 @@ private val JumpToBottomThreshold = 56.dp
 fun NotesPreview() {
     GraphNotesTheme {
         NoteListContent(
-            viewModel = NotesViewModel()
+            viewModel = NotesViewModel(NotesStorage())
         )
     }
 }

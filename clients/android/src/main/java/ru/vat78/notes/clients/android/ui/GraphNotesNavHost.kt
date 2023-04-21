@@ -20,9 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import ru.vat78.notes.clients.android.data.NotesStorage
 import ru.vat78.notes.clients.android.data.TaskShortView
+import ru.vat78.notes.clients.android.notes.NoteEditor
+import ru.vat78.notes.clients.android.notes.NoteEditorViewModel
 import ru.vat78.notes.clients.android.notes.NoteListContent
 import ru.vat78.notes.clients.android.notes.NotesViewModel
 import ru.vat78.notes.clients.android.tasks.SingleTaskScreen
@@ -31,7 +36,8 @@ import ru.vat78.notes.clients.android.tasks.TasksScreen
 @Composable
 fun GraphNotesNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    noteStorage: NotesStorage = NotesStorage()
 ) {
     NavHost(
         navController = navController,
@@ -40,9 +46,37 @@ fun GraphNotesNavHost(
     ) {
         composable(route = NoteListScreen.route) {
             NoteListContent(
-                viewModel = NotesViewModel(),
+                viewModel = NotesViewModel(noteStorage),
+                onNoteClick = { noteUuid ->
+                    navController.navigate(
+                        route = "${EditNoteScreen.route}/${noteUuid}"
+                    )
+                },
+                onCreateNote = {
+                    navController.navigate(
+                        route = "${EditNoteScreen.route}/new"
+                    )
+                }
             )
         }
+        composable(
+            route = EditNoteScreen.routeWithArgs,
+            arguments = listOf(
+                navArgument(EditNoteScreen.uuidArgument) {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
+        ) { entry ->
+            NoteEditor(
+                noteUuid = entry.arguments?.getString(EditNoteScreen.uuidArgument) ?: "",
+                viewModel = NoteEditorViewModel(noteStorage),
+                onExit = { navController.popBackStack()}
+            )
+        }
+
+
+
         composable(route = Tasks.route) {
             TasksScreen(
                 onTaskClick = { task ->

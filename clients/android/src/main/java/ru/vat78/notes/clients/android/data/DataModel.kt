@@ -42,7 +42,7 @@ data class TaskDetails(
 
 @Immutable
 data class Note(
-    val uuid: UUID = UUID.randomUUID(),
+    val uuid: String = UUID.randomUUID().toString(),
     val caption: String,
     val type: String = NoteType.NOTE.toString(),
     val color: Color = Color.Transparent,
