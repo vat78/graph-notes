@@ -11,17 +11,13 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ru.vat78.notes.clients.android.data.Event
-import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.Tag
 
 @Composable
@@ -111,7 +107,7 @@ fun TagLabel(tag: Tag, modifier: Modifier) {
         ) {
             Row(modifier = modifier.padding(all = 4.dp)) {
                 Icon(
-                    imageVector = getIconByNoteType(tag.type),
+                    imageVector = tag.type.icon,
                     contentDescription = tag.type.name
                 )
 
@@ -127,8 +123,4 @@ fun TagLabel(tag: Tag, modifier: Modifier) {
             }
         }
     }
-}
-
-private fun getIconByNoteType(type: NoteType) : ImageVector {
-    return Icons.Filled.Check
 }

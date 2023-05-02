@@ -22,14 +22,22 @@ class NotesUiReducer(
             }
             is NotesUiEvent.CreateNote -> {
                 viewModelScope.launch {
-                    val caption = event.text.lines().firstOrNull() ?: ""
-                    val description = event.text.subSequence(caption.length, event.text.length).trim().toString()
-                    val newNote = Note(
-                        caption = caption,
-                        description = description,
-                        type = event.type.name
-                    )
-                    notesStorage.newNote(newNote)
+                    if (event.type.caption) {
+                        val caption = event.text.lines().firstOrNull() ?: ""
+                        val description = event.text.subSequence(caption.length, event.text.length).trim().toString()
+                        notesStorage.newNote(Note(
+                            caption = caption,
+                            description = description,
+                            type = event.type)
+                        )
+                    } else {
+                        val description = event.text
+                        notesStorage.newNote(Note(
+                            caption = "",
+                            description = description,
+                            type = event.type)
+                        )
+                    }
                 }
             }
         }

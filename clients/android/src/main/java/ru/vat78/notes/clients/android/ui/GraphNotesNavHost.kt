@@ -16,7 +16,9 @@
 
 package ru.vat78.notes.clients.android.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -34,6 +36,8 @@ import ru.vat78.notes.clients.android.tasks.SingleTaskScreen
 import ru.vat78.notes.clients.android.tasks.TasksScreen
 
 @Composable
+@ExperimentalComposeUiApi
+@ExperimentalFoundationApi
 fun GraphNotesNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,

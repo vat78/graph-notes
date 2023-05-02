@@ -48,16 +48,16 @@ class GraphDataRepository {
         return (0..(Random.nextInt(7))).map {
             val type = randomType()
             Event(type, "some event text", LocalDateTime.now().minusDays(Random.nextLong(7)), colorOfType(type))
-        }.filter { it.type == NoteType.NOTE || it.type == NoteType.EVENT }.toMutableList()
+        }.filter { it.type == NoteType.NOTE }.toMutableList()
     }
 
     private fun randomType(): NoteType {
         return when(Random.nextInt(5)) {
             0 -> NoteType.NOTE
             1 -> NoteType.TASK
-            2 -> NoteType.EVENT
+            2 -> NoteType.ORGANISATION
             3 -> NoteType.PERSON
-            else -> NoteType.PROJECT
+            else -> NoteType.TAG
         }
     }
 
@@ -65,8 +65,8 @@ class GraphDataRepository {
         return when(type) {
             NoteType.NOTE -> Color.Gray
             NoteType.TASK -> Color.Yellow
-            NoteType.EVENT -> Color.LightGray
-            NoteType.PROJECT -> Color.Green
+            NoteType.ORGANISATION -> Color.LightGray
+            NoteType.TAG -> Color.Green
             else -> Color.White
         }
     }

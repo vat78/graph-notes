@@ -70,6 +70,7 @@ fun SmallNoteEditor(
     onEventInput: (String) -> Unit,
     modifier: Modifier = Modifier,
     resetScroll: () -> Unit = {},
+    initialText: String = ""
 ) {
     var currentInputSelector by rememberSaveable { mutableStateOf(InputSelector.NONE) }
     val dismissKeyboard = { currentInputSelector = InputSelector.NONE }
@@ -80,7 +81,7 @@ fun SmallNoteEditor(
     }
 
     var textState by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue())
+        mutableStateOf(TextFieldValue(initialText))
     }
 
     // Used to decide if the keyboard should be shown
