@@ -1,21 +1,21 @@
 rootProject.name = "graph-notes"
 include("backend:notes-service")
-findProject(":backend:notes-service")?.name = "notes-service"
+include("clients:android")
+include("clients:web")
 
 pluginManagement{
-    plugins{
-        fun String.getVersion() = extra["$this.version"].toString()
-        // Kotlin
-        kotlin("jvm") version "kotlin".getVersion()
-        kotlin("plugin.allopen") version "kotlin".getVersion()
 
-        // Quarkus
-        id("io.quarkus") version "quarkus".getVersion()
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
 
 dependencyResolutionManagement{
     repositories {
+        google()
         mavenCentral()
         mavenLocal()
     }

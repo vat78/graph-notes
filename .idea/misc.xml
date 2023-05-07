@@ -1,7 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="../../../../../layout/compose-model-1663767357611.xml" value="0.5" />
+        <entry key="../../../../../layout/compose-model-1663769755827.xml" value="0.375" />
+        <entry key="../../../../../layout/compose-model-1663850577740.xml" value="0.75" />
+        <entry key="../../../../../layout/compose-model-1663852444237.xml" value="2.0" />
+        <entry key="../../../../../layout/compose-model-1663852623682.xml" value="1.0" />
+        <entry key="../../../../../layout/compose-model-1664025928308.xml" value="0.45" />
+        <entry key="../../../../../layout/compose-model-1664030204800.xml" value="0.3341317365269461" />
+        <entry key="../../../../../layout/compose-model-1664200446173.xml" value="0.24814814814814815" />
+        <entry key="../../../../../layout/compose-model-1664456244418.xml" value="0.1592809364548495" />
+        <entry key="../../../../../layout/compose-model-1664544502369.xml" value="0.24814814814814815" />
+        <entry key="../../../../../layout/compose-model-1664614211569.xml" value="0.25" />
+        <entry key="../../../../../layout/compose-model-1664962644709.xml" value="0.24814814814814815" />
+        <entry key="../../../../../layout/custom_preview.xml" value="0.20697463768115942" />
+        <entry key="clients/android/src/main/res/layout/activity_tasks.xml" value="0.19166666666666668" />
+        <entry key="clients/android/src/main/res/layout/content_tasks.xml" value="0.125" />
+        <entry key="clients/android/src/main/res/layout/fragment_first.xml" value="0.5" />
+        <entry key="clients/android/src/main/res/layout/fragment_second.xml" value="0.19166666666666668" />
+      </map>
+    </option>
+  </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="17" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_18" default="true" project-jdk-name="openjdk-18" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

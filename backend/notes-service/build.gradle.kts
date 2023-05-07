@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.allopen")
-    id("io.quarkus")
+    alias(libs.plugins.kotlin.jvm.plugin)
+    alias(libs.plugins.kotlin.allOpen.plugin)
+    alias(libs.plugins.quarkus.plugin)
 }
 
 version = "1.0-SNAPSHOT"
@@ -9,18 +9,17 @@ version = "1.0-SNAPSHOT"
 val quarkusVersion: String by project
 
 dependencies {
-    implementation(kotlin("stdlib"))
+    implementation(libs.kotlin.stdlib)
 
-    implementation(enforcedPlatform("io.quarkus:quarkus-bom:$quarkusVersion"))
+    implementation(enforcedPlatform(libs.quarkus.bom))
     implementation("io.quarkus:quarkus-kotlin")
     implementation("io.quarkus:quarkus-smallrye-graphql")
     implementation("io.quarkus:quarkus-resteasy")
     implementation("io.quarkus:quarkus-resteasy-jackson")
 
-    implementation("io.quarkiverse.neo4j:quarkus-neo4j:1.3.0")
-
     implementation("io.quarkus:quarkus-liquibase")
-    implementation("org.liquibase.ext:liquibase-neo4j:4.9.1")
+    implementation(libs.quarkus.neo4j)
+    implementation(libs.liquibase.neo4j)
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.quarkus:quarkus-junit5-mockito")
