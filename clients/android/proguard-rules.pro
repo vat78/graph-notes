@@ -21,3 +21,8 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class com.google.** { *; }
+
+-keepattributes Signature
+-keepattributes *Annotation*
+-keepattributes EnclosingMethod
+-keepattributes InnerClasses
