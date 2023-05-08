@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import ru.vat78.notes.clients.android.data.NotesStorage
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
@@ -20,7 +21,7 @@ class GraphNotesActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(
             ComposeView(this).apply {
                 setContent {
