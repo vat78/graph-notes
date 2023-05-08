@@ -4,7 +4,8 @@ plugins {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 33
+    namespace = "ru.vat78.notes.clients.android"
 
     defaultConfig {
         applicationId = "ru.vat78.notes.clients.android"
@@ -17,24 +18,25 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.0"
+        kotlinCompilerExtensionVersion = "1.4.5"
     }
 
 }
@@ -54,6 +56,13 @@ dependencies {
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.compose.ui.googlefonts)
+
+    implementation(libs.google.accompanist.permissions)
+
+    implementation(platform(libs.firebase.bom))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation(libs.firebase.ui.auth)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.runner)
