@@ -1,14 +1,10 @@
 <resources>
+    <!-- Common -->
+
     <string name="app_name">Graph notes</string>
-    <string name="title_activity_tasks">TasksActivity</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="tasks_fragment_label">Tasks</string>
-    <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="ok">OK</string>
 
     <string name="search">Search</string>
     <string name="info">Info</string>
@@ -24,5 +20,12 @@
     <string name="not_available_subtitle">Grab a beverage and check back later!</string>
 
     <string name="some_text">Some text</string>
+
+    <!-- FCM -->
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="request_notification_permission">Request permission</string>
+    <string name="notification_permission_title">Notification permission</string>
+    <string name="notification_permission_description">The notification permission is important for this app. Please grant the permission.</string>
+    <string name="notification_permission_settings">The notification permission is important for this app. Please navigate to your device settings and enable notifications for Make it So.</string>
 
 </resources>
