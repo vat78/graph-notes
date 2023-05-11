@@ -84,3 +84,10 @@ data class DictionaryElement(
 ) {
     constructor(note: Note): this(note.uuid, note.caption, note.color)
 }
+
+@Immutable
+data class User(
+    val id: String,
+    val name: String,
+    val email: String
+)

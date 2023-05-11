@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.app.plugin)
     alias(libs.plugins.kotlin.android.plugin)
+    alias(libs.plugins.google.services.plugin)
 }
 
 android {
@@ -58,6 +59,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.googlefonts)
 
     implementation(libs.google.accompanist.permissions)
+    implementation(libs.google.play.services.auth)
 
     implementation(platform(libs.firebase.bom))
     implementation("com.google.firebase:firebase-auth-ktx")

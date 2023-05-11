@@ -12,7 +12,6 @@
             <option value="$PROJECT_DIR$/backend/notes-service" />
             <option value="$PROJECT_DIR$/clients" />
             <option value="$PROJECT_DIR$/clients/android" />
-            <option value="$PROJECT_DIR$/clients/shared" />
             <option value="$PROJECT_DIR$/clients/web" />
           </set>
         </option>
