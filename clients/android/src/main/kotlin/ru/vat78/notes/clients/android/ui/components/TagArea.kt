@@ -17,12 +17,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.vat78.notes.clients.android.data.DictionaryElement
-import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 import java.util.*
 
 @ExperimentalFoundationApi
@@ -90,17 +87,17 @@ private fun cutText(text: String, maxLength: Int): String {
     }
 }
 
-@Preview
-@ExperimentalFoundationApi
-@Composable
-fun ViewTagArea() {
-    GraphNotesTheme {
-        TagArea(
-            tags = setOf(DictionaryElement(caption = "test 1"), DictionaryElement(caption = "test 2"),
-                DictionaryElement(caption = "test 3", color = Color.Red), DictionaryElement(caption = "test 3", color = Color.Red),
-                DictionaryElement(caption = "test 3", color = Color.Red), DictionaryElement(caption = "test with very long long long long long log long long text"),
-                DictionaryElement(caption = "test 1111111"), DictionaryElement(caption = "test 22222222222")
-            )
-        )
-    }
-}
+//@Preview
+//@ExperimentalFoundationApi
+//@Composable
+//fun ViewTagArea() {
+//    GraphNotesTheme {
+//        TagArea(
+//            tags = setOf(DictionaryElement(caption = "test 1"), DictionaryElement(caption = "test 2"),
+//                DictionaryElement(caption = "test 3", color = Color.Red), DictionaryElement(caption = "test 3", color = Color.Red),
+//                DictionaryElement(caption = "test 3", color = Color.Red), DictionaryElement(caption = "test with very long long long long long log long long text"),
+//                DictionaryElement(caption = "test 1111111"), DictionaryElement(caption = "test 22222222222")
+//            )
+//        )
+//    }
+//}

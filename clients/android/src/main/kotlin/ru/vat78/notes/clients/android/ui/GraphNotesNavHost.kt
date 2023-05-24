@@ -24,6 +24,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.notes.NoteEditor
 import ru.vat78.notes.clients.android.notes.NoteEditorViewModel
 import ru.vat78.notes.clients.android.notes.NoteListContent
@@ -43,7 +44,7 @@ fun GraphNotesNavHost(
     ) {
         composable(route = NoteListScreen.route) {
             NoteListContent(
-                viewModel = NotesViewModel(appState.notesStorage),
+                viewModel = NotesViewModel(appState.context),
                 onNoteClick = { noteUuid ->
                     appState.navigate(
                         route = "${EditNoteScreen.route}/${noteUuid}"
@@ -67,7 +68,7 @@ fun GraphNotesNavHost(
         ) { entry ->
             NoteEditor(
                 noteUuid = entry.arguments?.getString(EditNoteScreen.uuidArgument) ?: "",
-                viewModel = NoteEditorViewModel(appState.notesStorage),
+                viewModel = NoteEditorViewModel(appState.context),
                 onExit = { appState.popUp()}
             )
         }

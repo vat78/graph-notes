@@ -2,11 +2,11 @@ package ru.vat78.notes.clients.android.notes
 
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.StateFlow
+import ru.vat78.notes.clients.android.ApplicationContext
 import ru.vat78.notes.clients.android.base.BaseViewModel
-import ru.vat78.notes.clients.android.data.NotesStorage
 
 class NotesViewModel(
-    storage: NotesStorage
+    contextHolder: ApplicationContext,
 ) : BaseViewModel<NotesUiState, NotesUiEvent>() {
 
     private val reducer = NotesUiReducer(
@@ -14,7 +14,7 @@ class NotesViewModel(
             caption = "Test",
             notes = emptyList()
         ),
-        notesStorage = storage,
+        contextHolder = contextHolder,
         viewModelScope = viewModelScope
     )
 

@@ -4,8 +4,8 @@ import androidx.compose.runtime.Immutable
 import ru.vat78.notes.clients.android.base.UiEvent
 import ru.vat78.notes.clients.android.base.UiState
 import ru.vat78.notes.clients.android.data.DictionaryElement
-import ru.vat78.notes.clients.android.data.Note
-import ru.vat78.notes.clients.android.data.NoteType
+import ru.vat78.notes.clients.android.data.NoteWithLinks
+import ru.vat78.notes.clients.android.data.ObjectType
 import java.time.LocalDateTime
 
 enum class EditFormState {
@@ -17,10 +17,10 @@ enum class EditFormState {
 
 @Immutable
 data class NoteEditorUiState(
-    val note: Note = Note(),
+    val note: NoteWithLinks,
+    val noteType: ObjectType,
     val status: EditFormState = EditFormState.NEW,
-    val parentValue: DictionaryElement? = null,
-    val tags: Set<DictionaryElement> = setOf(),
+    val suggestions: List<DictionaryElement> = emptyList()
 ) : UiState
 
 sealed class NotesEditorUiEvent: UiEvent {
@@ -49,7 +49,7 @@ sealed class NotesEditorUiEvent: UiEvent {
     ): NotesEditorUiEvent()
 
     data class ChangeType(
-        val type: NoteType
+        val type: ObjectType
     ): NotesEditorUiEvent()
 
     data class ChangeStart(
@@ -66,10 +66,13 @@ sealed class NotesEditorUiEvent: UiEvent {
 
     data class AddTag(
         val newTag: DictionaryElement,
-        val onlyParent: Boolean = false
     ): NotesEditorUiEvent()
 
     data class RemoveTag(
         val tag: DictionaryElement
+    ): NotesEditorUiEvent()
+
+    data class RequestSuggestions(
+        val text: String
     ): NotesEditorUiEvent()
 }

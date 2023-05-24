@@ -36,6 +36,8 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.CoroutineScope
+import ru.vat78.notes.clients.android.AppEvent
+import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.firebase.auth.FirebaseAuthentication
 import ru.vat78.notes.clients.android.ui.components.PermissionDialog
 import ru.vat78.notes.clients.android.ui.components.RationaleDialog
@@ -65,12 +67,15 @@ fun GraphNotesApp() {
 
         Surface(color = MaterialTheme.colors.background) {
             val appState = rememberAppState()
-            val user = appState.user.collectAsState()
+            val user = appState.context.currentUser.collectAsState(null)
 
             if (user.value == null ) {
                 FirebaseAuthentication(
-                    onSignIn = appState::setUser
+                    onSignIn = { appState.context.riseEvent(AppEvent.OnAuth(it)) },
+                    onFailure = { appState.context.riseEvent(AppEvent.OnAuth(null)) },
                 )
+            } else {
+                appState.context.riseEvent(AppEvent.InitUser(user.value))
             }
 
             Scaffold(

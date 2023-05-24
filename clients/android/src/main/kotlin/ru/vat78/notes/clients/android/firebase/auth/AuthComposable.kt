@@ -9,6 +9,7 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.AuthUI.IdpConfig.EmailBuilder
 import com.firebase.ui.auth.AuthUI.IdpConfig.GitHubBuilder
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import ru.vat78.notes.clients.android.R
@@ -21,6 +22,12 @@ fun FirebaseAuthentication(
     firebaseAuth: FirebaseAuth = Firebase.auth
 ) {
 
+    val currentUser = firebaseAuth.currentUser
+    if (currentUser != null) {
+        onSignIn.invoke(currentUser.toAppUser())
+        return
+    }
+
     val signInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -30,13 +37,7 @@ fun FirebaseAuthentication(
             if (firebaseUser == null) {
                 onSignIn.invoke(null)
             } else {
-                val email = firebaseUser.email ?: ""
-                val user = User(
-                    id = firebaseUser.uid,
-                    name = firebaseUser.displayName ?: email,
-                    email = email
-                )
-                onSignIn.invoke(user)
+                onSignIn.invoke(firebaseUser.toAppUser())
             }
         } else {
             onFailure.invoke()
@@ -59,4 +60,13 @@ fun FirebaseAuthentication(
                 .build()
         )
     }
+}
+
+private fun FirebaseUser.toAppUser() : User? {
+    val emailTxt = email ?: ""
+    return User(
+        id = uid,
+        name = displayName ?: emailTxt,
+        email = emailTxt
+    )
 }
