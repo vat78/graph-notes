@@ -67,9 +67,9 @@ data class TaskDetails(
 
 @Immutable
 data class Note(
+    val type: String,
     val uuid: String = UUID.randomUUID().toString(),
     val caption: String = "",
-    val type: NoteType = NoteType.NOTE,
     val color: Color = Color.Transparent,
     val description: String = "",
     val start: LocalDateTime = LocalDateTime.now(),
@@ -77,12 +77,19 @@ data class Note(
 )
 
 @Immutable
+data class NoteWithLinks(
+    val note: Note,
+    val parents: Set<DictionaryElement> = emptySet(),
+)
+
+@Immutable
 data class DictionaryElement(
-    val uuid: String = UUID.randomUUID().toString(),
+    val id: String,
+    val type: String,
     val caption: String,
     val color: Color = Color.Transparent,
 ) {
-    constructor(note: Note): this(note.uuid, note.caption, note.color)
+    constructor(note: Note): this(note.uuid, note.type, note.caption, note.color)
 }
 
 @Immutable
@@ -91,3 +98,21 @@ data class User(
     val name: String,
     val email: String
 )
+
+@Immutable
+data class ObjectType(
+    val name: String = "",
+    val icon: String = "Note",
+    val tag: Boolean = true,
+    val hierarchical: Boolean = false,
+    val symbol: String = "",
+    val defaultStart: TimeDefault = TimeDefault.NOW,
+    val defaultFinish: TimeDefault = TimeDefault.NOW,
+    val id: String = UUID.randomUUID().toString(),
+    val default: Boolean = false,
+)
+
+enum class TimeDefault {
+    START_OF_TIME, PREVIOUS_NOTE, NOW, NEXT_MONTH, NEXT_YEAR, END_OF_TIME,
+}
+
