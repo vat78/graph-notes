@@ -5,8 +5,6 @@ import android.util.Log
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.data.AppContext
 import ru.vat78.notes.clients.android.data.StubAppContext
 import ru.vat78.notes.clients.android.data.User

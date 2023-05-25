@@ -9,7 +9,7 @@ import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteStorage
 import ru.vat78.notes.clients.android.data.NoteWithLinks
-import ru.vat78.notes.clients.android.data.ObjectType
+import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.User
 import ru.vat78.notes.clients.android.data.generateTime
 import java.time.LocalDateTime
@@ -37,7 +37,7 @@ class NoteRepository (
         return result
     }
 
-    override fun buildNewNote(type: ObjectType, text: String, parent: Note?) {
+    override fun buildNewNote(type: NoteType, text: String, parent: Note?) {
         val startTime = generateTime(type.defaultStart, LocalDateTime::now)
         val finishTime = generateTime(type.defaultFinish, LocalDateTime::now)
         val note: Note by lazy {
