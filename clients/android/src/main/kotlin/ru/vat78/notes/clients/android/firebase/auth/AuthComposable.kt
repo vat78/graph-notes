@@ -62,7 +62,7 @@ fun FirebaseAuthentication(
     }
 }
 
-private fun FirebaseUser.toAppUser() : User? {
+private fun FirebaseUser.toAppUser() : User {
     val emailTxt = email ?: ""
     return User(
         id = uid,

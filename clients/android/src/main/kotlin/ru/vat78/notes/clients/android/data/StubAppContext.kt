@@ -30,12 +30,12 @@ class StubAppContext : AppContext {
     override val noteTypeStorage: NoteTypeStorage
         get() = object: NoteTypeStorage {
             private val _cache = defaultTypes.associateBy { it.id }
-            override val types: Map<String, ObjectType>
+            override val types: Map<String, NoteType>
                 get() = _cache
 
             override suspend fun reload() {}
 
-            override suspend fun getDefaultType(): ObjectType {
+            override suspend fun getDefaultType(): NoteType {
                 return _cache.values.first { it.default }
             }
         }
@@ -47,7 +47,7 @@ class StubAppContext : AppContext {
                 }.sortedBy { it.start }
             }
 
-            override fun buildNewNote(type: ObjectType, text: String, parent: Note?) {
+            override fun buildNewNote(type: NoteType, text: String, parent: Note?) {
                 val startTime = generateTime(type.defaultStart, LocalDateTime::now)
                 val finishTime = generateTime(type.defaultFinish, LocalDateTime::now)
                 val note: Note by lazy {
@@ -108,7 +108,7 @@ class StubAppContext : AppContext {
             .first()
     }
 
-    fun getNoteTypeById(id: String): ObjectType {
+    fun getNoteTypeById(id: String): NoteType {
         return defaultTypes.find { type -> type.id == id }!!
     }
 

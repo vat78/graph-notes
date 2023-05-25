@@ -7,14 +7,14 @@ interface UserStorage {
 }
 
 interface NoteTypeStorage {
-    val types : Map<String, ObjectType>
+    val types : Map<String, NoteType>
     suspend fun reload()
-    suspend fun getDefaultType(): ObjectType
+    suspend fun getDefaultType(): NoteType
 }
 
 interface NoteStorage {
     suspend fun getNotes(types: List<String> = emptyList()): List<Note>
-    fun buildNewNote(type: ObjectType, text: String, parent: Note? = null)
+    fun buildNewNote(type: NoteType, text: String, parent: Note? = null)
     suspend fun getNoteForEdit(uuid: String): NoteWithLinks
 }
 
@@ -24,13 +24,13 @@ abstract class TagSearchService {
         excludedTypes: List<String>,
         excludedTags: List<String>): List<DictionaryElement>
 
-    suspend fun searchTagSuggestions(text: String, existingLinks: Set<DictionaryElement>, typeInfoSource: (String) -> ObjectType): List<DictionaryElement> {
+    suspend fun searchTagSuggestions(text: String, existingLinks: Set<DictionaryElement>, typeInfoSource: (String) -> NoteType): List<DictionaryElement> {
         val excludedTags = existingLinks.map { it.id }
         val excludedTypes = existingLinks.stream()
             .map { it.type }
             .distinct()
             .map { typeInfoSource(it) }
-            .filter(ObjectType::hierarchical)
+            .filter(NoteType::hierarchical)
             .map { it.id }
             .toList()
         return searchTagSuggestions(text, excludedTypes, excludedTags)

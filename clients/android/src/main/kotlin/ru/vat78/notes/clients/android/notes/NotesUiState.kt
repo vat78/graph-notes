@@ -4,13 +4,13 @@ import androidx.compose.runtime.Immutable
 import ru.vat78.notes.clients.android.base.UiEvent
 import ru.vat78.notes.clients.android.base.UiState
 import ru.vat78.notes.clients.android.data.Note
-import ru.vat78.notes.clients.android.data.ObjectType
+import ru.vat78.notes.clients.android.data.NoteType
 
 @Immutable
 class NotesUiState(
     val caption: String,
     val notes: List<Note>,
-    val noteTypes: List<ObjectType> = emptyList(),
+    val noteTypes: List<NoteType> = emptyList(),
 ) : UiState {
 
 }
@@ -18,7 +18,7 @@ class NotesUiState(
 sealed class NotesUiEvent: UiEvent {
     data class CreateNote(
         val text: String,
-        val type: ObjectType? = null
+        val type: NoteType? = null
     ): NotesUiEvent()
 
     data class LoadNotes(
