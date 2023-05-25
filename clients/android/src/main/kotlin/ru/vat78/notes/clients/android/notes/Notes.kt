@@ -55,9 +55,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import ru.vat78.notes.clients.android.ApplicationContext
 import ru.vat78.notes.clients.android.data.Note
-import ru.vat78.notes.clients.android.data.NoteType
-import ru.vat78.notes.clients.android.data.NotesStorage
 import ru.vat78.notes.clients.android.ui.components.FunctionalityNotAvailablePopup
 import ru.vat78.notes.clients.android.ui.components.InfoIcon
 import ru.vat78.notes.clients.android.ui.components.JumpToBegin
@@ -86,7 +85,7 @@ fun NoteListContent(
     val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
     val scope = rememberCoroutineScope()
 
-    viewModel.sendEvent(NotesUiEvent.LoadNotes(null))
+    viewModel.sendEvent(NotesUiEvent.LoadNotes(emptyList()))
 
     Surface(modifier = modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -103,7 +102,7 @@ fun NoteListContent(
                 )
                 SmallNoteEditor(
                     onEventInput = { content ->
-                        viewModel.sendEvent(NotesUiEvent.CreateNote(NoteType.NOTE, content))
+                        viewModel.sendEvent(NotesUiEvent.CreateNote(text = content))
                         onCreateNote()
                     },
                     resetScroll = {
@@ -340,7 +339,7 @@ private val JumpToBottomThreshold = 56.dp
 fun NotesPreview() {
     GraphNotesTheme {
         NoteListContent(
-            viewModel = NotesViewModel(NotesStorage())
+            viewModel = NotesViewModel(ApplicationContext())
         )
     }
 }

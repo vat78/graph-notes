@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Note
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -46,10 +48,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ru.vat78.notes.clients.android.ApplicationContext
 import ru.vat78.notes.clients.android.data.Note
-import ru.vat78.notes.clients.android.data.NoteType
-import ru.vat78.notes.clients.android.data.NoteTypeStructure
-import ru.vat78.notes.clients.android.data.NotesStorage
+import ru.vat78.notes.clients.android.data.ObjectType
+import ru.vat78.notes.clients.android.data.TmpIcons
+import ru.vat78.notes.clients.android.data.defaultTypes
 import ru.vat78.notes.clients.android.ui.components.TagArea
 import ru.vat78.notes.clients.android.ui.components.TextFieldWithAutocomplete
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
@@ -119,13 +122,14 @@ fun EditNoteForm(
     modifier: Modifier = Modifier,
     scrollableState: ScrollState = rememberScrollState()
 ) {
-    val note = uiState.note
+    val note = uiState.note.note
+    val noteType = uiState.noteType
     Surface (
         modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.verticalScroll(scrollableState)) {
             TypeAndCaption(
-                type = note.type,
+                type = noteType,
                 caption = note.caption,
                 onTypeChanges = {
                     viewModel.sendEvent(NotesEditorUiEvent.ChangeType(it))
@@ -135,7 +139,7 @@ fun EditNoteForm(
                 }
             )
 
-            if (note.type.description) {
+            if (!noteType.tag) {
                 DescriptionEditor(
                     text = note.description,
                     onChanges = {
@@ -143,36 +147,23 @@ fun EditNoteForm(
                     },
                 )
             }
-            if (note.type.time) {
-                TimeEditors(
-                    note = note,
-                    onStartChanged = {
-                        viewModel.sendEvent(NotesEditorUiEvent.ChangeStart(it))
-                    },
-                    onFinishChanged = {
-                        viewModel.sendEvent(NotesEditorUiEvent.ChangeFinish(it))
-                    }
-                )
-            }
-            if (note.type.structure != NoteTypeStructure.NONE) {
-                println("!!!!!!! Rebuild model for autocomplete !!!!!!!!!!")
-                val autocompleteModel = if (note.type.structure == NoteTypeStructure.HIERARCHY)
-                    viewModel.getModelForAutocomplete(
-                        initialText = uiState.parentValue?.caption ?: "",
-                        typeFilter = note.type,
-                        timeFilter = note.type == NoteType.TASK)
-                else
-                    viewModel.getModelForAutocomplete(
-                        initialText = "",
-                        typeFilter = if (note.type.structure == NoteTypeStructure.ANY_TAGS) null else note.type,
-                        timeFilter = false
-                    )
+            TimeEditors(
+                note = note,
+                onStartChanged = {
+                    viewModel.sendEvent(NotesEditorUiEvent.ChangeStart(it))
+                },
+                onFinishChanged = {
+                    viewModel.sendEvent(NotesEditorUiEvent.ChangeFinish(it))
+                }
+            )
+
+
 
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    val multiTags = note.type.structure != NoteTypeStructure.HIERARCHY
+                    val multiTags = !noteType.hierarchical
                     if (multiTags) {
                         TagArea(
-                            tags = uiState.tags,
+                            tags = uiState.note.parents,
                             onDeleteTag = {
                                 viewModel.sendEvent(NotesEditorUiEvent.RemoveTag(it))
                             },
@@ -180,29 +171,30 @@ fun EditNoteForm(
                         )
                     }
 
+                    val text = remember { mutableStateOf("") }
                     TextFieldWithAutocomplete(
-                        textSource = autocompleteModel::text,
+                        textSource = text::value,
                         hint = "Enter tag name",
-                        tipsProvider = autocompleteModel::suggestions,
+                        tipsProvider = uiState::suggestions,
                         tipsOnTop = multiTags,
-                        onQuery = autocompleteModel::requestSuggestions,
+                        onQuery =  { viewModel.sendEvent(NotesEditorUiEvent.RequestSuggestions(it)) },
                         onValueSet = {
-                            viewModel.sendEvent(NotesEditorUiEvent.AddTag(it, !multiTags))
+                            viewModel.sendEvent(NotesEditorUiEvent.AddTag(it))
                         },
                     )
                 }
 
-            }
+
         }
     }
 }
 
 @Composable
 fun TypeAndCaption(
-    type: NoteType,
+    type: ObjectType,
     caption: String,
     modifier: Modifier = Modifier,
-    onTypeChanges: (NoteType) -> Unit = {},
+    onTypeChanges: (ObjectType) -> Unit = {},
     onCaptionChanges: (String) -> Unit = {},
 ) {
     val expanded = remember { mutableStateOf(false) }
@@ -211,7 +203,7 @@ fun TypeAndCaption(
 
         Box(modifier = Modifier.align(CenterVertically)) {
             Icon(
-                imageVector = type.icon,
+                imageVector = TmpIcons[type.icon] ?: Icons.Filled.Note,
                 contentDescription = type.name,
                 modifier = Modifier
                     .background(Color.Transparent)
@@ -222,7 +214,7 @@ fun TypeAndCaption(
                 expanded = expanded.value,
                 onDismissRequest = { expanded.value = false }
             ) {
-                for (typeOption in NoteType.values()) {
+                for (typeOption in defaultTypes) {
                     DropdownMenuItem(
                         onClick = {
                             onTypeChanges.invoke(typeOption)
@@ -230,7 +222,7 @@ fun TypeAndCaption(
                         },
                         leadingIcon = {
                             Icon(
-                                imageVector = typeOption.icon,
+                                imageVector = TmpIcons[typeOption.icon] ?: Icons.Filled.Note,
                                 contentDescription = typeOption.name,
                             )
                         },
@@ -242,7 +234,7 @@ fun TypeAndCaption(
             }
         }
 
-        if (type.caption) {
+        if (type.tag) {
             TextField(
                 value = caption,
                 singleLine = false,
@@ -329,14 +321,14 @@ fun TimeEditors(
     val startDatePicker = DatePickerDialog(
         mContext,
         { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            onStartChanged.invoke(note.start.withYear(mYear).withMonth(mMonth).withDayOfMonth(mDayOfMonth))
+            onStartChanged.invoke(note.start.withYear(mYear).withMonth(mMonth+1).withDayOfMonth(mDayOfMonth))
         },
         note.start.year, note.start.monthValue, note.start.dayOfMonth
     )
     val finishDatePicker = DatePickerDialog(
         mContext,
         { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            onFinishChanged.invoke(note.start.withYear(mYear).withMonth(mMonth).withDayOfMonth(mDayOfMonth))
+            onFinishChanged.invoke(note.start.withYear(mYear).withMonth(mMonth+1).withDayOfMonth(mDayOfMonth))
         },
         note.finish.year, note.finish.monthValue, note.finish.dayOfMonth
     )
@@ -402,7 +394,7 @@ fun TimeEditors(
 fun NoteEditorPreview() {
     GraphNotesTheme {
         NoteEditor(
-            viewModel = NoteEditorViewModel(NotesStorage()),
+            viewModel = NoteEditorViewModel(ApplicationContext()),
             noteUuid = "test-uuid"
         )
     }
