@@ -8,7 +8,7 @@ import com.google.firebase.firestore.ktx.toObjects
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import ru.vat78.notes.clients.android.data.NoteTypeStorage
-import ru.vat78.notes.clients.android.data.ObjectType
+import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.User
 import ru.vat78.notes.clients.android.data.defaultTypes
 
@@ -17,16 +17,16 @@ class NoteTypeRepository (
     val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : NoteTypeStorage {
 
-    private var _cache: Map<String, ObjectType> = emptyMap()
+    private var _cache: Map<String, NoteType> = emptyMap()
     override val types
         get() = _cache
 
     override suspend fun reload() {
-        val data: List<ObjectType> = firestore.collection(USER_COLLECTION)
+        val data: List<NoteType> = firestore.collection(USER_COLLECTION)
             .document(user.id)
             .collection(NOTE_TYPES_COLLECTION)
             .snapshots()
-            .map<QuerySnapshot, List<ObjectType>> { snapshot -> snapshot.toObjects() }
+            .map<QuerySnapshot, List<NoteType>> { snapshot -> snapshot.toObjects() }
             .first()
         if (data.isEmpty()) {
             saveToCache(storeDefaultTypes())
@@ -36,11 +36,11 @@ class NoteTypeRepository (
         Log.i("Note types repository", "Note types reloaded and ${_cache.size} values were cached")
     }
 
-    override suspend fun getDefaultType(): ObjectType {
+    override suspend fun getDefaultType(): NoteType {
         return types.values.first { it.default }
     }
 
-    private fun storeDefaultTypes(): List<ObjectType> {
+    private fun storeDefaultTypes(): List<NoteType> {
         val collection = firestore.collection(USER_COLLECTION)
             .document(user.id)
             .collection(NOTE_TYPES_COLLECTION)
@@ -51,7 +51,7 @@ class NoteTypeRepository (
         return defaultTypes
     }
 
-    private fun saveToCache(types: List<ObjectType>) {
+    private fun saveToCache(types: List<NoteType>) {
         _cache = types.associateBy { it.id }
     }
 }

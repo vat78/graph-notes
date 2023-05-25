@@ -50,7 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.vat78.notes.clients.android.ApplicationContext
 import ru.vat78.notes.clients.android.data.Note
-import ru.vat78.notes.clients.android.data.ObjectType
+import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.TmpIcons
 import ru.vat78.notes.clients.android.data.defaultTypes
 import ru.vat78.notes.clients.android.ui.components.TagArea
@@ -191,10 +191,10 @@ fun EditNoteForm(
 
 @Composable
 fun TypeAndCaption(
-    type: ObjectType,
+    type: NoteType,
     caption: String,
     modifier: Modifier = Modifier,
-    onTypeChanges: (ObjectType) -> Unit = {},
+    onTypeChanges: (NoteType) -> Unit = {},
     onCaptionChanges: (String) -> Unit = {},
 ) {
     val expanded = remember { mutableStateOf(false) }
