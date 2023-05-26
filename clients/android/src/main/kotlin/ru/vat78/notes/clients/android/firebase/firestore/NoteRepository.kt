@@ -1,5 +1,7 @@
 package ru.vat78.notes.clients.android.firebase.firestore
 
+import androidx.compose.ui.graphics.Color
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
@@ -8,11 +10,13 @@ import kotlinx.coroutines.withContext
 import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteStorage
-import ru.vat78.notes.clients.android.data.NoteWithLinks
 import ru.vat78.notes.clients.android.data.NoteType
+import ru.vat78.notes.clients.android.data.NoteWithLinks
 import ru.vat78.notes.clients.android.data.User
 import ru.vat78.notes.clients.android.data.generateTime
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class NoteRepository (
     val user: User,
@@ -30,16 +34,17 @@ class NoteRepository (
                 query = query.whereIn("type", types)
             }
             return@withContext query
+                .orderBy("finish")
                 .get()
                 .await()
-                .toObjects(Note::class.java)
+                .map {doc -> doc.toNote()}
         }
         return result
     }
 
     override fun buildNewNote(type: NoteType, text: String, parent: Note?) {
-        val startTime = generateTime(type.defaultStart, LocalDateTime::now)
-        val finishTime = generateTime(type.defaultFinish, LocalDateTime::now)
+        val startTime = generateTime(type.defaultStart, ZonedDateTime::now)
+        val finishTime = generateTime(type.defaultFinish, ZonedDateTime::now)
         val note: Note by lazy {
             if (type.tag) {
                 Note(
@@ -71,27 +76,102 @@ class NoteRepository (
         return NoteWithLinks(getNote(uuid), getParentLinks(uuid).toSet())
     }
 
-    private fun getNote(id: String) : Note {
+    override suspend fun saveNote(note: Note, parents: Set<DictionaryElement>) {
+        val parentsFromDb = getParentIds(note.id).toSet()
+        firestore.collection(USER_COLLECTION)
+            .document(user.id)
+            .collection(NOTES_COLLECTION)
+            .document(note.id)
+            .set(note.toMap())
+
+        val parentIds = parents.map { it.id }.toSet()
+        val newLinks = parentIds - parentsFromDb
+        val forDeletion = parentsFromDb - parentIds
+
+        forDeletion.forEach{
+            firestore.collection(USER_COLLECTION)
+                .document(user.id)
+                .collection(NOTES_COLLECTION)
+                .document(note.id)
+                .collection(PARENT_LINKS_COLLECTION)
+                .document(it)
+                .delete()
+        }
+
+        newLinks.forEach{
+            firestore.collection(USER_COLLECTION)
+                .document(user.id)
+                .collection(NOTES_COLLECTION)
+                .document(note.id)
+                .collection(PARENT_LINKS_COLLECTION)
+                .document(it)
+                .set(it)
+        }
+    }
+
+    override suspend fun insertChild(child: Note, parents: Set<DictionaryElement>) {
+        TODO("Not yet implemented")
+    }
+
+    private suspend fun getNote(id: String) : Note {
         return firestore.collection(USER_COLLECTION)
             .document(user.id)
             .collection(NOTES_COLLECTION)
             .document(id)
             .get()
-            .result
-            ?.toObject(Note::class.java)
+            .await()
+            ?.toNote()
             ?: throw Exception("Note not found")
     }
 
-    private fun getParentLinks(id: String) : List<DictionaryElement> {
+    private suspend fun getParentLinks(id: String) : List<DictionaryElement> {
+        val ids = getParentIds(id)
+        if (ids.isEmpty()) {
+            return listOf()
+        }
         return firestore.collection(USER_COLLECTION)
             .document(user.id)
             .collection(NOTES_COLLECTION)
-            .document(id)
+            .whereIn("id", ids)
+            .get()
+            .await()
+            ?.toObjects(DictionaryElement::class.java)
+            ?: emptyList()
+    }
+
+    private suspend fun getParentIds(noteId: String) : List<String> {
+        return firestore.collection(USER_COLLECTION)
+            .document(user.id)
+            .collection(NOTES_COLLECTION)
+            .document(noteId)
             .collection(PARENT_LINKS_COLLECTION)
             .get()
-            .result
-            ?.toObjects(DictionaryElement::class.java)
+            .await()
+            ?.map { it.id }
             ?: emptyList()
     }
 }
 
+private fun Note.toMap() : Map<String, Any> {
+    return mapOf(
+        "id" to  id,
+        "type" to type,
+        "caption" to caption,
+        "description" to description,
+        "color" to color.value.toLong(),
+        "start" to start.toInstant().epochSecond,
+        "finish" to finish.toInstant().epochSecond
+    )
+}
+
+private fun DocumentSnapshot.toNote() : Note {
+    return Note(
+        id = data?.get("id") as String,
+        caption = data?.get("caption") as String,
+        type = data?.get("type") as String,
+        description = data?.get("description") as String,
+        color = Color(data?.get("color") as Long),
+        start = ZonedDateTime.ofInstant(Instant.ofEpochSecond(data?.get("start") as Long), ZoneId.systemDefault()),
+        finish = ZonedDateTime.ofInstant(Instant.ofEpochSecond(data?.get("finish") as Long), ZoneId.systemDefault())
+    )
+}

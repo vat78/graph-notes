@@ -27,6 +27,10 @@ class AppEventHandler(
                     Log.i("Auth event", "All action for user ${event.user?.name} are triggered")
                 }
             }
+
+            is AppEvent.NoteSaved -> {
+
+            }
         }
     }
 }

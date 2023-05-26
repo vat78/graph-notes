@@ -2,18 +2,18 @@ package ru.vat78.notes.clients.android.data
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.*
 
 @Immutable
 data class Note(
-    val type: String,
-    val uuid: String = UUID.randomUUID().toString(),
+    val type: String = "",
+    val id: String = UUID.randomUUID().toString(),
     val caption: String = "",
     val color: Color = Color.Transparent,
     val description: String = "",
-    val start: LocalDateTime = LocalDateTime.now(),
-    val finish: LocalDateTime = LocalDateTime.now()
+    val start: ZonedDateTime = ZonedDateTime.now(),
+    val finish: ZonedDateTime = ZonedDateTime.now()
 )
 
 @Immutable
@@ -29,7 +29,7 @@ data class DictionaryElement(
     val caption: String,
     val color: Color = Color.Transparent,
 ) {
-    constructor(note: Note): this(note.uuid, note.type, note.caption, note.color)
+    constructor(note: Note): this(note.id, note.type, note.caption, note.color)
 }
 
 @Immutable
