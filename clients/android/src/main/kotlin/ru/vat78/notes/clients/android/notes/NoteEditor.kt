@@ -52,13 +52,12 @@ import ru.vat78.notes.clients.android.ApplicationContext
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.TmpIcons
-import ru.vat78.notes.clients.android.data.defaultTypes
 import ru.vat78.notes.clients.android.ui.components.TagArea
 import ru.vat78.notes.clients.android.ui.components.TextFieldWithAutocomplete
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
-import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 @Composable
 fun NoteEditor(
@@ -109,7 +108,7 @@ fun NoteEditor(
         }
         EditNoteForm(
             uiState = uiState,
-            viewModel = viewModel,
+            sendEvent = viewModel::sendEvent,
             modifier = Modifier.padding(it)
         )
     }
@@ -118,11 +117,11 @@ fun NoteEditor(
 @Composable
 fun EditNoteForm(
     uiState: NoteEditorUiState,
-    viewModel: NoteEditorViewModel,
+    sendEvent: (NotesEditorUiEvent) -> Unit,
     modifier: Modifier = Modifier,
     scrollableState: ScrollState = rememberScrollState()
 ) {
-    val note = uiState.note.note
+    val note = uiState.changed.note
     val noteType = uiState.noteType
     Surface (
         modifier = modifier.fillMaxWidth()
@@ -131,11 +130,12 @@ fun EditNoteForm(
             TypeAndCaption(
                 type = noteType,
                 caption = note.caption,
+                availableTypes = uiState.availableTypes,
                 onTypeChanges = {
-                    viewModel.sendEvent(NotesEditorUiEvent.ChangeType(it))
+                    sendEvent.invoke(NotesEditorUiEvent.ChangeType(it))
                 },
                 onCaptionChanges = {
-                    viewModel.sendEvent(NotesEditorUiEvent.ChangeCaption(it))
+                    sendEvent.invoke(NotesEditorUiEvent.ChangeCaption(it))
                 }
             )
 
@@ -143,17 +143,17 @@ fun EditNoteForm(
                 DescriptionEditor(
                     text = note.description,
                     onChanges = {
-                        viewModel.sendEvent(NotesEditorUiEvent.ChangeDescription(it))
+                        sendEvent.invoke(NotesEditorUiEvent.ChangeDescription(it))
                     },
                 )
             }
             TimeEditors(
                 note = note,
                 onStartChanged = {
-                    viewModel.sendEvent(NotesEditorUiEvent.ChangeStart(it))
+                    sendEvent.invoke(NotesEditorUiEvent.ChangeStart(it))
                 },
                 onFinishChanged = {
-                    viewModel.sendEvent(NotesEditorUiEvent.ChangeFinish(it))
+                    sendEvent.invoke(NotesEditorUiEvent.ChangeFinish(it))
                 }
             )
 
@@ -163,9 +163,9 @@ fun EditNoteForm(
                     val multiTags = !noteType.hierarchical
                     if (multiTags) {
                         TagArea(
-                            tags = uiState.note.parents,
+                            tags = uiState.changed.parents,
                             onDeleteTag = {
-                                viewModel.sendEvent(NotesEditorUiEvent.RemoveTag(it))
+                                sendEvent.invoke(NotesEditorUiEvent.RemoveTag(it))
                             },
                             modifier = modifier.fillMaxWidth()
                         )
@@ -177,9 +177,9 @@ fun EditNoteForm(
                         hint = "Enter tag name",
                         tipsProvider = uiState::suggestions,
                         tipsOnTop = multiTags,
-                        onQuery =  { viewModel.sendEvent(NotesEditorUiEvent.RequestSuggestions(it)) },
+                        onQuery =  { sendEvent.invoke(NotesEditorUiEvent.RequestSuggestions(it)) },
                         onValueSet = {
-                            viewModel.sendEvent(NotesEditorUiEvent.AddTag(it))
+                            sendEvent.invoke(NotesEditorUiEvent.AddTag(it))
                         },
                     )
                 }
@@ -193,6 +193,7 @@ fun EditNoteForm(
 fun TypeAndCaption(
     type: NoteType,
     caption: String,
+    availableTypes: Collection<NoteType>,
     modifier: Modifier = Modifier,
     onTypeChanges: (NoteType) -> Unit = {},
     onCaptionChanges: (String) -> Unit = {},
@@ -214,7 +215,7 @@ fun TypeAndCaption(
                 expanded = expanded.value,
                 onDismissRequest = { expanded.value = false }
             ) {
-                for (typeOption in defaultTypes) {
+                for (typeOption in availableTypes) {
                     DropdownMenuItem(
                         onClick = {
                             onTypeChanges.invoke(typeOption)
@@ -298,8 +299,8 @@ fun DescriptionEditor(
 @Composable
 fun TimeEditors(
     note: Note,
-    onStartChanged: (LocalDateTime) -> Unit = {},
-    onFinishChanged: (LocalDateTime) -> Unit = {},
+    onStartChanged: (ZonedDateTime) -> Unit = {},
+    onFinishChanged: (ZonedDateTime) -> Unit = {},
     onAlignStart: () -> Unit = {},
 ) {
     val mContext = LocalContext.current
@@ -355,7 +356,7 @@ fun TimeEditors(
                             .clickable { startDatePicker.show() }
                     )
                 }
-                if (LocalDate.now().atStartOfDay().isBefore(note.start)) {
+                if (ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS).isBefore(note.start)) {
                     Text(
                         text = "Set to last time today",
                         modifier = Modifier.clickable { onAlignStart.invoke() }.align(CenterHorizontally)

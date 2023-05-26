@@ -1,14 +1,17 @@
 package ru.vat78.notes.clients.android.data
 
 import java.time.LocalDateTime
+import java.time.ZoneOffset.UTC
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 
 class StubAppContext : AppContext {
     private val notes: MutableList<Note> = arrayListOf(
         Note(type = defaultTypes.first { it.default }.id, caption = "test 1"),
         Note(type = defaultTypes.first { it.default }.id, caption = "test 2"),
-        Note(type = defaultTypes.first { it.default }.id, caption = "test formatted", start = LocalDateTime.of(2023, 3, 23, 18, 55), description = "shfsh ;ljrg sdfbgsn @test fl;cvbmvcx fdsdfblmkb sbksdlkb sbnlskdgb dsklbnlksdbn  sdfbldskblksd dsbkmdsblksm sdfkblmskldbm sdbmsldkbm  sdmbflkdsmbsl dsbmlkdsmb sdbklmsldkbms sdmflbsld"),
-        Note(type = defaultTypes.first { it.default }.id, uuid = "test-uuid", caption = "test 3", start = LocalDateTime.of(2023, 3, 22, 18, 55), description = "dlfak *vblmafbvmf afbmafdbma* abfdbbadabd"),
-        Note(type = defaultTypes.first { it.default }.id, caption = "test 4", start = LocalDateTime.of(2023, 3, 22, 18, 0)),
+        Note(type = defaultTypes.first { it.default }.id, caption = "test formatted", start = ZonedDateTime.of(LocalDateTime.of(2023, 3, 23, 18, 55), UTC), description = "shfsh ;ljrg sdfbgsn @test fl;cvbmvcx fdsdfblmkb sbksdlkb sbnlskdgb dsklbnlksdbn  sdfbldskblksd dsbkmdsblksm sdfkblmskldbm sdbmsldkbm  sdmbflkdsmbsl dsbmlkdsmb sdbklmsldkbms sdmflbsld"),
+        Note(type = defaultTypes.first { it.default }.id, id = "test-uuid", caption = "test 3", start = ZonedDateTime.of(LocalDateTime.of(2023, 3, 22, 18, 55), UTC), description = "dlfak *vblmafbvmf afbmafdbma* abfdbbadabd"),
+        Note(type = defaultTypes.first { it.default }.id, caption = "test 4", start = ZonedDateTime.of(LocalDateTime.of(2023, 3, 22, 18, 0), UTC)),
         Note(caption = "test tag", type = defaultTypes.first { !it.default }.id),
         Note(caption = "super tag", type = defaultTypes.first { !it.default }.id),
     )
@@ -23,7 +26,6 @@ class StubAppContext : AppContext {
     override val userStorage: UserStorage
         get() = object: UserStorage {
             override suspend fun saveUser(user: User?) {
-
             }
         }
 
@@ -48,8 +50,8 @@ class StubAppContext : AppContext {
             }
 
             override fun buildNewNote(type: NoteType, text: String, parent: Note?) {
-                val startTime = generateTime(type.defaultStart, LocalDateTime::now)
-                val finishTime = generateTime(type.defaultFinish, LocalDateTime::now)
+                val startTime = generateTime(type.defaultStart, ZonedDateTime::now)
+                val finishTime = generateTime(type.defaultFinish, ZonedDateTime::now)
                 val note: Note by lazy {
                     if (type.tag) {
                         Note(
@@ -75,6 +77,14 @@ class StubAppContext : AppContext {
             }
 
             override suspend fun getNoteForEdit(uuid: String): NoteWithLinks {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun saveNote(note: Note, parents: Set<DictionaryElement>) {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun insertChild(child: Note, parents: Set<DictionaryElement>) {
                 TODO("Not yet implemented")
             }
         }
@@ -104,7 +114,7 @@ class StubAppContext : AppContext {
         }
         return notes
             .asSequence()
-            .filter { note -> note.uuid == uuid }
+            .filter { note -> note.id == uuid }
             .first()
     }
 
@@ -113,7 +123,7 @@ class StubAppContext : AppContext {
     }
 
     fun saveNote(note: Note) {
-        val existingNote = notes.find { n -> n.uuid == note.uuid }
+        val existingNote = notes.find { n -> n.id == note.id }
         if (existingNote != null) {
             notes.remove(existingNote)
         }
@@ -128,15 +138,15 @@ class StubAppContext : AppContext {
         return notes
             .asSequence()
             .filter { note -> (typeFilter.isEmpty() || typeFilter.contains(note.type)) }
-            .filter { note -> !timeFilter || (note.start.isAfter(LocalDateTime.now()) && note.finish.isBefore(LocalDateTime.now())) }
+            .filter { note -> !timeFilter || (note.start.isAfter(ZonedDateTime.now()) && note.finish.isBefore(ZonedDateTime.now())) }
             .filter { note -> note.caption.contains(name, ignoreCase = true) }
             .map { note -> DictionaryElement(note) }
             .take(7)
             .toList()
     }
 
-    fun getClosestTimeOrDefault(default: LocalDateTime): LocalDateTime {
-        val midnight = default.toLocalDate().atStartOfDay()
+    fun getClosestTimeOrDefault(default: ZonedDateTime): ZonedDateTime {
+        val midnight = default.truncatedTo(ChronoUnit.DAYS)
         return notes
             .asSequence()
             .filter { note -> note.type == defaultTypes[0].id && note.finish.isAfter(midnight) }

@@ -66,7 +66,7 @@ import ru.vat78.notes.clients.android.ui.components.SymbolAnnotationType
 import ru.vat78.notes.clients.android.ui.components.messageFormatter
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -188,7 +188,7 @@ fun Notes(
 
                 item {
                     NoteShort(
-                        uuid = content.uuid,
+                        uuid = content.id,
                         caption = content.caption,
                         description = content.description,
                         time = content.start,
@@ -226,7 +226,7 @@ fun NoteShort(
     uuid: String,
     caption: String,
     description: String,
-    time: LocalDateTime,
+    time: ZonedDateTime,
     icon: ImageVector = Icons.Filled.Info,
     color: Color = MaterialTheme.colorScheme.tertiary,
     onNoteClick: (String) -> Unit = { }

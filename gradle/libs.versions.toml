@@ -63,6 +63,7 @@ kotlin-plugin = { id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref 
 kotlin-jvm-plugin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-allOpen-plugin = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
 kotlin-multiplatform-plugin = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization-plugin = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 quarkus-plugin = { id = "io.quarkus", version.ref = "quarkus" }
 secrets-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secrets" }
 sonarqube = { id = "org.sonarqube", version = "3.3"}
@@ -137,6 +138,7 @@ junit = { module = "junit:junit", version.ref = "junit" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.5.0" }
 liquibase-neo4j = { module = "org.liquibase.ext:liquibase-neo4j", version = "4.9.1" }
 okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }

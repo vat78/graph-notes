@@ -1,5 +1,6 @@
 package ru.vat78.notes.clients.android
 
+import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.User
 
 sealed class AppEvent {
@@ -10,5 +11,10 @@ sealed class AppEvent {
 
     data class InitUser(
         val user: User?
+    ) : AppEvent()
+
+    data class NoteSaved(
+        val previousVersion: Note,
+        val newValue: Note
     ) : AppEvent()
 }

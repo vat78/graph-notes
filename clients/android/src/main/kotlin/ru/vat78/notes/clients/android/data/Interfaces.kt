@@ -16,6 +16,8 @@ interface NoteStorage {
     suspend fun getNotes(types: List<String> = emptyList()): List<Note>
     fun buildNewNote(type: NoteType, text: String, parent: Note? = null)
     suspend fun getNoteForEdit(uuid: String): NoteWithLinks
+    suspend fun saveNote(note: Note, parents: Set<DictionaryElement>)
+    suspend fun insertChild(child: Note, parents: Set<DictionaryElement>)
 }
 
 abstract class TagSearchService {

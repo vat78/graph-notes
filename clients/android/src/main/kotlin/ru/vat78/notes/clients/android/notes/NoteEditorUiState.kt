@@ -4,9 +4,9 @@ import androidx.compose.runtime.Immutable
 import ru.vat78.notes.clients.android.base.UiEvent
 import ru.vat78.notes.clients.android.base.UiState
 import ru.vat78.notes.clients.android.data.DictionaryElement
-import ru.vat78.notes.clients.android.data.NoteWithLinks
 import ru.vat78.notes.clients.android.data.NoteType
-import java.time.LocalDateTime
+import ru.vat78.notes.clients.android.data.NoteWithLinks
+import java.time.ZonedDateTime
 
 enum class EditFormState {
     NEW,
@@ -17,8 +17,10 @@ enum class EditFormState {
 
 @Immutable
 data class NoteEditorUiState(
-    val note: NoteWithLinks,
+    val origin: NoteWithLinks,
+    val changed: NoteWithLinks,
     val noteType: NoteType,
+    val availableTypes: Collection<NoteType>,
     val status: EditFormState = EditFormState.NEW,
     val suggestions: List<DictionaryElement> = emptyList()
 ) : UiState
@@ -53,15 +55,15 @@ sealed class NotesEditorUiEvent: UiEvent {
     ): NotesEditorUiEvent()
 
     data class ChangeStart(
-        val startTime: LocalDateTime
+        val startTime: ZonedDateTime
     ): NotesEditorUiEvent()
 
     data class ChangeFinish(
-        val finishTime: LocalDateTime
+        val finishTime: ZonedDateTime
     ): NotesEditorUiEvent()
 
     data class AlignStartTime(
-        val currentValue: LocalDateTime
+        val currentValue: ZonedDateTime
     ): NotesEditorUiEvent()
 
     data class AddTag(
