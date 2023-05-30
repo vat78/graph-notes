@@ -63,10 +63,7 @@ class NoteEditorUiReducer(
                             note = oldState.changed.note.copy(caption = "")
                         }
                         contextHolder.services.noteStorage.saveNote(note, oldState.changed.parents)
-                        if (!oldState.changed.parents.isEmpty()) {
-                            contextHolder.services.noteStorage.insertChild(note, oldState.changed.parents)
-                        }
-                        contextHolder.riseEvent(AppEvent.NoteSaved(oldState.origin.note, note))
+                        contextHolder.riseEvent(AppEvent.NoteSaved(if (event.isNew) Note() else oldState.origin.note, note))
                     }
                     setState(
                         oldState.copy(status = EditFormState.CLOSED)
@@ -184,7 +181,7 @@ class NoteEditorUiReducer(
                 viewModelScope.launch {
                     val types = contextHolder.services.noteTypeStorage.types
                     val newSuggestions = contextHolder.services
-                        .tagSearchService.searchTagSuggestions(event.text, oldState.changed.parents,) { types[it]!! }
+                        .tagSearchService.searchTagSuggestions(event.text, oldState.changed) { types[it]!! }
                     setState(
                         oldState.copy(
                             suggestions = newSuggestions

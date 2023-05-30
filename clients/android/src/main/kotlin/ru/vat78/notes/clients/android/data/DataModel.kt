@@ -24,9 +24,9 @@ data class NoteWithLinks(
 
 @Immutable
 data class DictionaryElement(
-    val id: String,
-    val type: String,
-    val caption: String,
+    val id: String = "",
+    val type: String = "",
+    val caption: String = "",
     val color: Color = Color.Transparent,
 ) {
     constructor(note: Note): this(note.id, note.type, note.caption, note.color)

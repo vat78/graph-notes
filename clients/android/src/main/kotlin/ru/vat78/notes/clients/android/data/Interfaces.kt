@@ -1,7 +1,5 @@
 package ru.vat78.notes.clients.android.data
 
-import kotlin.streams.toList
-
 interface UserStorage {
     suspend fun saveUser(user: User?)
 }
@@ -17,25 +15,44 @@ interface NoteStorage {
     fun buildNewNote(type: NoteType, text: String, parent: Note? = null)
     suspend fun getNoteForEdit(uuid: String): NoteWithLinks
     suspend fun saveNote(note: Note, parents: Set<DictionaryElement>)
-    suspend fun insertChild(child: Note, parents: Set<DictionaryElement>)
 }
 
 abstract class TagSearchService {
     abstract suspend fun searchTagSuggestions(
-        text: String,
+        words: Set<String>,
         excludedTypes: List<String>,
-        excludedTags: List<String>): List<DictionaryElement>
+        excludedTags: Set<String>): List<DictionaryElement>
 
-    suspend fun searchTagSuggestions(text: String, existingLinks: Set<DictionaryElement>, typeInfoSource: (String) -> NoteType): List<DictionaryElement> {
-        val excludedTags = existingLinks.map { it.id }
-        val excludedTypes = existingLinks.stream()
+    // ToDo: add filtering by time of availability of tags
+    // ToDo: add statistics of usage of suggestions and ordering by it
+    suspend fun searchTagSuggestions(text: String, note: NoteWithLinks, typeInfoSource: (String) -> NoteType): List<DictionaryElement> {
+        val existingLinks = note.parents
+        val excludedTags = existingLinks.map { it.id }.toSet() + note.note.id
+        val excludedTypes = existingLinks.asSequence()
             .map { it.type }
             .distinct()
             .map { typeInfoSource(it) }
             .filter(NoteType::hierarchical)
             .map { it.id }
             .toList()
-        return searchTagSuggestions(text, excludedTypes, excludedTags)
+
+        val words = getWordsForSearch(text)
+        return searchTagSuggestions(words, excludedTypes, excludedTags)
+    }
+
+    abstract suspend fun deleteTagSuggestions(tokens: Set<String>, tagId: String)
+    abstract suspend fun updateTagSuggestions(tokens: Set<String>, tagId: String, typeId: String)
+
+    suspend fun updateTagSuggestions(oldText: String, newText: String, tagId: String, typeId: String) {
+        val oldTokens = buildSearchBlocks(oldText)
+        val newTokens = buildSearchBlocks(newText)
+        val forDeletion = oldTokens - newTokens
+        if (forDeletion.isNotEmpty()) {
+            deleteTagSuggestions(forDeletion, tagId)
+        }
+        if (newTokens.isNotEmpty()) {
+            updateTagSuggestions(newTokens, tagId, typeId)
+        }
     }
 }
 

@@ -177,7 +177,10 @@ fun EditNoteForm(
                         hint = "Enter tag name",
                         tipsProvider = uiState::suggestions,
                         tipsOnTop = multiTags,
-                        onQuery =  { sendEvent.invoke(NotesEditorUiEvent.RequestSuggestions(it)) },
+                        onQuery =  {
+                            sendEvent.invoke(NotesEditorUiEvent.RequestSuggestions(it))
+                            text.value = it
+                                   },
                         onValueSet = {
                             sendEvent.invoke(NotesEditorUiEvent.AddTag(it))
                         },

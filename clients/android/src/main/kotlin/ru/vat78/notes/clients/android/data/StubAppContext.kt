@@ -84,18 +84,23 @@ class StubAppContext : AppContext {
                 TODO("Not yet implemented")
             }
 
-            override suspend fun insertChild(child: Note, parents: Set<DictionaryElement>) {
-                TODO("Not yet implemented")
-            }
         }
 
     override val tagSearchService: TagSearchService
         get() = object: TagSearchService() {
             override suspend fun searchTagSuggestions(
-                text: String,
-                excludedTypes: List<String>,
-                excludedTags: List<String>
+                words: Set<String>,
+                excludedTypes: Set<String>,
+                excludedTags: Set<String>
             ): List<DictionaryElement> {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun deleteTagSuggestions(tokens: Set<String>, tagId: String) {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun updateTagSuggestions(tokens: Set<String>, tagId: String, typeId: String) {
                 TODO("Not yet implemented")
             }
         }

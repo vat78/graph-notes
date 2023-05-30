@@ -4,6 +4,8 @@ import androidx.compose.ui.graphics.Color
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.WriteBatch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -77,40 +79,68 @@ class NoteRepository (
     }
 
     override suspend fun saveNote(note: Note, parents: Set<DictionaryElement>) {
-        val parentsFromDb = getParentIds(note.id).toSet()
-        firestore.collection(USER_COLLECTION)
-            .document(user.id)
-            .collection(NOTES_COLLECTION)
-            .document(note.id)
-            .set(note.toMap())
-
-        val parentIds = parents.map { it.id }.toSet()
-        val newLinks = parentIds - parentsFromDb
-        val forDeletion = parentsFromDb - parentIds
-
-        forDeletion.forEach{
+        withContext(Dispatchers.IO) {
+            val parentsFromDb = getParentIds(note.id).toSet()
             firestore.collection(USER_COLLECTION)
                 .document(user.id)
                 .collection(NOTES_COLLECTION)
                 .document(note.id)
-                .collection(PARENT_LINKS_COLLECTION)
-                .document(it)
-                .delete()
-        }
+                .set(note.toMap(), SetOptions.merge())
 
-        newLinks.forEach{
-            firestore.collection(USER_COLLECTION)
-                .document(user.id)
-                .collection(NOTES_COLLECTION)
-                .document(note.id)
-                .collection(PARENT_LINKS_COLLECTION)
-                .document(it)
-                .set(it)
+            val parentIds = parents.map { it.id }.toSet()
+            val newLinks = parentIds - parentsFromDb
+            val forDeletion = parentsFromDb - parentIds
+
+            firestore.runBatch { batch ->
+                forDeletion.forEach {
+                    deleteLink(batch, note.id, it)
+                }
+            }
+
+            firestore.runBatch { batch ->
+                newLinks.forEach {
+                    insertLink(batch, note.id, it)
+                }
+            }
         }
     }
 
-    override suspend fun insertChild(child: Note, parents: Set<DictionaryElement>) {
-        TODO("Not yet implemented")
+    private fun deleteLink(batch: WriteBatch, childNoteId: String, parentNoteId: String) {
+        batch.delete(
+            firestore.collection(USER_COLLECTION)
+                .document(user.id)
+                .collection(NOTES_COLLECTION)
+                .document(childNoteId)
+                .collection(PARENT_LINKS_COLLECTION)
+                .document(parentNoteId)
+        )
+        batch.delete(
+            firestore.collection(USER_COLLECTION)
+                .document(user.id)
+                .collection(NOTES_COLLECTION)
+                .document(parentNoteId)
+                .collection(CHILD_LINKS_COLLECTION)
+                .document(childNoteId)
+        )
+    }
+
+    private fun insertLink(batch: WriteBatch, childNoteId: String, parentNoteId: String) {
+        batch.set(
+            firestore.collection(USER_COLLECTION)
+                .document(user.id)
+                .collection(NOTES_COLLECTION)
+                .document(childNoteId)
+                .collection(PARENT_LINKS_COLLECTION)
+                .document(parentNoteId), mapOf("id" to parentNoteId)
+        )
+        batch.set(
+            firestore.collection(USER_COLLECTION)
+                .document(user.id)
+                .collection(NOTES_COLLECTION)
+                .document(parentNoteId)
+                .collection(CHILD_LINKS_COLLECTION)
+                .document(childNoteId), mapOf("id" to childNoteId)
+        )
     }
 
     private suspend fun getNote(id: String) : Note {
@@ -135,7 +165,7 @@ class NoteRepository (
             .whereIn("id", ids)
             .get()
             .await()
-            ?.toObjects(DictionaryElement::class.java)
+            ?.map {doc -> doc.toDictionaryElement()}
             ?: emptyList()
     }
 
