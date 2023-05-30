@@ -2,9 +2,11 @@
 package ru.vat78.notes.clients.android
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.plus
 import ru.vat78.notes.clients.android.data.AppContext
 import ru.vat78.notes.clients.android.data.StubAppContext
 import ru.vat78.notes.clients.android.data.User
@@ -24,7 +26,7 @@ class ApplicationContext {
         get() = _services
 
 
-    private val eventHandler = AppEventHandler(this, MainScope())
+    private val eventHandler = AppEventHandler(this, MainScope().plus(CoroutineName("AppEventHandler")))
 
     fun riseEvent(event: AppEvent) {
         eventHandler.riseEvent(event)
