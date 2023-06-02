@@ -90,7 +90,7 @@ class StubAppContext : AppContext {
         get() = object: TagSearchService() {
             override suspend fun searchTagSuggestions(
                 words: Set<String>,
-                excludedTypes: Set<String>,
+                excludedTypes: List<String>,
                 excludedTags: Set<String>
             ): List<DictionaryElement> {
                 TODO("Not yet implemented")
