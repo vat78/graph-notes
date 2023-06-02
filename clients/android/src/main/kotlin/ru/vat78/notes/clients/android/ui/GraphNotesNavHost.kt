@@ -29,13 +29,16 @@ import ru.vat78.notes.clients.android.notes.NoteEditor
 import ru.vat78.notes.clients.android.notes.NoteEditorViewModel
 import ru.vat78.notes.clients.android.notes.NoteListContent
 import ru.vat78.notes.clients.android.notes.NotesViewModel
+import ru.vat78.notes.clients.android.tags.TagListContent
+import ru.vat78.notes.clients.android.tags.TagsViewModel
 
 @Composable
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 fun GraphNotesNavHost(
     appState: AppState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavIconPressed: () -> Unit = { },
 ) {
     NavHost(
         navController = appState.navController,
@@ -54,7 +57,8 @@ fun GraphNotesNavHost(
                     appState.navigate(
                         route = "${EditNoteScreen.route}/new"
                     )
-                }
+                },
+                onNavIconPressed = onNavIconPressed
             )
         }
         composable(
@@ -70,6 +74,20 @@ fun GraphNotesNavHost(
                 noteUuid = entry.arguments?.getString(EditNoteScreen.uuidArgument) ?: "",
                 viewModel = NoteEditorViewModel(appState.context),
                 onExit = { appState.popUp()}
+            )
+        }
+        composable(
+            route = TagListScreen.routeWithArgs,
+            arguments = listOf(
+                navArgument(TagListScreen.tagType) {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
+        ) { entry ->
+            TagListContent(
+                type = entry.arguments?.getString(TagListScreen.tagType) ?: "",
+                viewModel = TagsViewModel(appState.context),
             )
         }
 

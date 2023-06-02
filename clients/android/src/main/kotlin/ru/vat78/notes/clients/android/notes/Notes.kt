@@ -82,7 +82,7 @@ fun NoteListContent(
     val uiState by viewModel.state.collectAsState()
     val scrollState = rememberLazyListState()
     val topBarState = rememberTopAppBarState()
-    val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
     val scope = rememberCoroutineScope()
 
     viewModel.sendEvent(NotesUiEvent.LoadNotes(emptyList()))

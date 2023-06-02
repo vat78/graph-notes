@@ -40,3 +40,10 @@ object EditNoteScreen: BaseScreen {
     const val uuidArgument = "uuid"
     val routeWithArgs = "${route}/{${uuidArgument}}"
 }
+
+object TagListScreen: BaseScreen {
+    override val icon = Icons.Filled.Edit
+    override val route = "tags"
+    const val tagType = "type"
+    val routeWithArgs = "${route}/{${tagType}}"
+}
