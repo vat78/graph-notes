@@ -23,7 +23,7 @@ val TmpIcons : Map<String, ImageVector> = mapOf(
 
 val defaultTypes = listOf(
     NoteType(
-        name = "note",
+        name = "Notes",
         icon = "Note",
         tag = false,
         hierarchical = false,
@@ -33,16 +33,16 @@ val defaultTypes = listOf(
         default = true
     ),
     NoteType(
-        name = "task",
+        name = "Tasks",
         icon = "Check",
         tag = true,
         hierarchical = true,
-        symbol = "@",
+        symbol = "&",
         defaultStart = TimeDefault.NOW,
         defaultFinish = TimeDefault.NEXT_MONTH
     ),
     NoteType(
-        name = "tag",
+        name = "Tags",
         icon = "Tag",
         tag = true,
         hierarchical = false,
@@ -51,16 +51,16 @@ val defaultTypes = listOf(
         defaultFinish = TimeDefault.END_OF_TIME
     ),
     NoteType(
-        name = "person",
+        name = "Persons",
         icon = "People",
         tag = true,
         hierarchical = false,
-        symbol = "&",
+        symbol = "@",
         defaultStart = TimeDefault.START_OF_TIME,
         defaultFinish = TimeDefault.END_OF_TIME
     ),
     NoteType(
-        name = "organisation",
+        name = "Organisations",
         icon = "House",
         tag = true,
         hierarchical = false,
@@ -69,7 +69,7 @@ val defaultTypes = listOf(
         defaultFinish = TimeDefault.END_OF_TIME
     ),
     NoteType(
-        name = "phone",
+        name = "Phones",
         icon = "Phone",
         tag = true,
         hierarchical = false,

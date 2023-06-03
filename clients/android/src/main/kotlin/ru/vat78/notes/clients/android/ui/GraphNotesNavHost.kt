@@ -16,6 +16,7 @@
 
 package ru.vat78.notes.clients.android.ui
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -46,11 +47,12 @@ fun GraphNotesNavHost(
         modifier = modifier
     ) {
         composable(route = NoteListScreen.route) {
+            Log.i("GraphNotesNavHost", "Route to ${NoteListScreen.route}")
             NoteListContent(
                 viewModel = NotesViewModel(appState.context),
-                onNoteClick = { noteUuid ->
+                onNoteClick = { note ->
                     appState.navigate(
-                        route = "${EditNoteScreen.route}/${noteUuid}"
+                        route = "${EditNoteScreen.route}/${note.id}"
                     )
                 },
                 onCreateNote = {
@@ -70,8 +72,10 @@ fun GraphNotesNavHost(
                 }
             )
         ) { entry ->
+            val noteUuid = entry.arguments?.getString(EditNoteScreen.uuidArgument)
+            Log.i("GraphNotesNavHost", "Route to ${EditNoteScreen.route} with uuid = $noteUuid")
             NoteEditor(
-                noteUuid = entry.arguments?.getString(EditNoteScreen.uuidArgument) ?: "",
+                noteUuid = noteUuid ?: "",
                 viewModel = NoteEditorViewModel(appState.context),
                 onExit = { appState.popUp()}
             )
@@ -82,12 +86,36 @@ fun GraphNotesNavHost(
                 navArgument(TagListScreen.tagType) {
                     type = NavType.StringType
                     nullable = false
+                },
+                navArgument(TagListScreen.rootTag) {
+                    type = NavType.StringType
+                    nullable = true
                 }
             )
         ) { entry ->
+            val type = entry.arguments?.getString(TagListScreen.tagType)
+            val rootId  = entry.arguments?.getString(TagListScreen.rootTag)
+            Log.i("GraphNotesNavHost", "Route to ${TagListScreen.route} with type = $type and root = $rootId")
             TagListContent(
-                type = entry.arguments?.getString(TagListScreen.tagType) ?: "",
+                type = type ?: "",
+                rootId  = rootId,
                 viewModel = TagsViewModel(appState.context),
+                onNoteClick = { note ->
+                    appState.navigate(
+                        route = "${TagListScreen.route}/${note.type}?root=${note.id}"
+                    )
+                },
+                onCreateNote = {
+                    appState.navigate(
+                        route = "${EditNoteScreen.route}/new"
+                    )
+                },
+                onCaptionClick = { note ->
+                    appState.navigate(
+                        route = "${EditNoteScreen.route}/${note.id}"
+                    )
+                },
+                onNavIconPressed = onNavIconPressed
             )
         }
 

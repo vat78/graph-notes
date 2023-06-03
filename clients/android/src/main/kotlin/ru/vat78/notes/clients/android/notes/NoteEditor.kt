@@ -139,14 +139,12 @@ fun EditNoteForm(
                 }
             )
 
-            if (!noteType.tag) {
-                DescriptionEditor(
-                    text = note.description,
-                    onChanges = {
-                        sendEvent.invoke(NotesEditorUiEvent.ChangeDescription(it))
-                    },
-                )
-            }
+            DescriptionEditor(
+                text = note.description,
+                onChanges = {
+                    sendEvent.invoke(NotesEditorUiEvent.ChangeDescription(it))
+                },
+            )
             TimeEditors(
                 note = note,
                 onStartChanged = {

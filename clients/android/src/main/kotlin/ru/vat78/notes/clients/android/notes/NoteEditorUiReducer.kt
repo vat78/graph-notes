@@ -7,7 +7,7 @@ import ru.vat78.notes.clients.android.AppEvent
 import ru.vat78.notes.clients.android.ApplicationContext
 import ru.vat78.notes.clients.android.base.Reducer
 import ru.vat78.notes.clients.android.data.Note
-import ru.vat78.notes.clients.android.data.NoteWithLinks
+import ru.vat78.notes.clients.android.data.NoteWithParents
 
 class NoteEditorUiReducer(
     initial: NoteEditorUiState,
@@ -32,7 +32,7 @@ class NoteEditorUiReducer(
 
             is NotesEditorUiEvent.LoadNote -> {
                 viewModelScope.launch {
-                    val note = contextHolder.services.noteStorage.getNoteForEdit(event.uuid)
+                    val note = contextHolder.services.noteStorage.getNoteWithParents(event.uuid)
                     val noteTypes = contextHolder.services.noteTypeStorage.types
                     val state = if (event.uuid == "new") EditFormState.CHANGED else EditFormState.LOADED
                     setState(
@@ -55,7 +55,9 @@ class NoteEditorUiReducer(
                             if (oldState.changed.note.caption == "") {
                                 // ToDo: implement error
                             }
-                            note = oldState.changed.note.copy(description = "")
+                            val noteType = oldState.changed.note.type
+                            val notRoot = oldState.changed.parents.any { it.type == noteType }
+                            note = oldState.changed.note.copy(root = !notRoot)
                         } else {
                             if (oldState.changed.note.description == "") {
                                 // ToDo: implement error
@@ -85,7 +87,7 @@ class NoteEditorUiReducer(
                     setState(
                         oldState.copy(
                             status = EditFormState.CHANGED,
-                            changed = NoteWithLinks(oldState.changed.note.copy(caption = event.text), oldState.changed.parents)
+                            changed = NoteWithParents(oldState.changed.note.copy(caption = event.text), oldState.changed.parents)
                         )
                     )
                 }
@@ -97,7 +99,7 @@ class NoteEditorUiReducer(
                     setState(
                         oldState.copy(
                             status = EditFormState.CHANGED,
-                            changed = NoteWithLinks(oldState.changed.note.copy(description = event.text), oldState.changed.parents)
+                            changed = NoteWithParents(oldState.changed.note.copy(description = event.text), oldState.changed.parents)
                         )
                     )
                 }
@@ -109,7 +111,7 @@ class NoteEditorUiReducer(
                     setState(
                         oldState.copy(
                             status = EditFormState.CHANGED,
-                            changed = NoteWithLinks(oldState.changed.note.copy(type = event.type.id), oldState.changed.parents),
+                            changed = NoteWithParents(oldState.changed.note.copy(type = event.type.id), oldState.changed.parents),
                             noteType = event.type
                         )
                     )
@@ -122,7 +124,7 @@ class NoteEditorUiReducer(
                     setState(
                         oldState.copy(
                             status = EditFormState.CHANGED,
-                            changed = NoteWithLinks(oldState.changed.note.copy(start = event.startTime), oldState.changed.parents),
+                            changed = NoteWithParents(oldState.changed.note.copy(start = event.startTime), oldState.changed.parents),
                         )
                     )
                 }
@@ -134,7 +136,7 @@ class NoteEditorUiReducer(
                     setState(
                         oldState.copy(
                             status = EditFormState.CHANGED,
-                            changed = NoteWithLinks(oldState.changed.note.copy(finish = event.finishTime), oldState.changed.parents),
+                            changed = NoteWithParents(oldState.changed.note.copy(finish = event.finishTime), oldState.changed.parents),
                         )
                     )
                 }
@@ -158,7 +160,7 @@ class NoteEditorUiReducer(
                     setState(
                         oldState.copy(
                             status = EditFormState.CHANGED,
-                            changed = NoteWithLinks(oldState.changed.note, newTags),
+                            changed = NoteWithParents(oldState.changed.note, newTags),
                             suggestions = emptyList()
                         )
                     )
@@ -171,7 +173,7 @@ class NoteEditorUiReducer(
                     setState(
                         oldState.copy(
                             status = EditFormState.CHANGED,
-                            changed = NoteWithLinks(oldState.changed.note, newTags),
+                            changed = NoteWithParents(oldState.changed.note, newTags),
                         )
                     )
                 }

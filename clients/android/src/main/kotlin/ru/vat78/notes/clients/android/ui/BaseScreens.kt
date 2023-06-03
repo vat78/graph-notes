@@ -45,5 +45,6 @@ object TagListScreen: BaseScreen {
     override val icon = Icons.Filled.Edit
     override val route = "tags"
     const val tagType = "type"
-    val routeWithArgs = "${route}/{${tagType}}"
+    const val rootTag = "root"
+    val routeWithArgs = "${route}/{${tagType}}?root={${rootTag}}"
 }

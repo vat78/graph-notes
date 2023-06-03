@@ -1,5 +1,6 @@
 package ru.vat78.notes.clients.android.firebase.firestore
 
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -13,7 +14,9 @@ import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteStorage
 import ru.vat78.notes.clients.android.data.NoteType
-import ru.vat78.notes.clients.android.data.NoteWithLinks
+import ru.vat78.notes.clients.android.data.NoteWithChildren
+import ru.vat78.notes.clients.android.data.NoteWithParents
+import ru.vat78.notes.clients.android.data.NotesFilter
 import ru.vat78.notes.clients.android.data.User
 import ru.vat78.notes.clients.android.data.generateTime
 import java.time.Instant
@@ -25,15 +28,32 @@ class NoteRepository (
     val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : NoteStorage {
 
-    private var newNote: NoteWithLinks? = null
+    private var newNote: NoteWithParents? = null
 
-    override suspend fun getNotes(types: List<String>): List<Note> {
+    override suspend fun getNotes(filter: NotesFilter): List<Note> {
+        Log.i("NoteRepository", "Request for notes with filter $filter")
+        if (filter.noteIdsForLoad?.isEmpty() == true) {
+            return emptyList()
+        }
         val result = withContext(Dispatchers.IO) {
             var query: Query = firestore.collection(USER_COLLECTION)
                 .document(user.id)
                 .collection(NOTES_COLLECTION)
-            if (types.isNotEmpty()) {
-                query = query.whereIn("type", types)
+            if (filter.typesToLoad?.isNotEmpty() == true) {
+                Log.i("NoteRepository", "Include types ${filter.typesToLoad}")
+                query = query.whereIn("type", filter.typesToLoad)
+            }
+            if (filter.typesToExclude?.isNotEmpty() == true) {
+                Log.i("NoteRepository", "Exclude types ${filter.typesToExclude}")
+                query = query.whereNotIn("type", filter.typesToExclude)
+            }
+            if (filter.noteIdsForLoad != null) {
+                Log.i("NoteRepository", "Get ids ${filter.noteIdsForLoad}")
+                query = query.whereIn("id", filter.noteIdsForLoad)
+            }
+            if (filter.onlyRoots) {
+                Log.i("NoteRepository", "Select only root elements")
+                query = query.whereEqualTo("root", true)
             }
             return@withContext query
                 .orderBy("finish")
@@ -65,17 +85,21 @@ class NoteRepository (
             }
         }
         newNote = if (parent == null) {
-            NoteWithLinks(note, emptySet())
+            NoteWithParents(note, emptySet())
         } else {
-            NoteWithLinks(note, setOf(DictionaryElement(parent)))
+            NoteWithParents(note, setOf(DictionaryElement(parent)))
         }
     }
 
-    override suspend fun getNoteForEdit(uuid: String): NoteWithLinks {
+    override suspend fun getNoteWithParents(uuid: String): NoteWithParents {
         if (uuid == "new") {
             return newNote ?: throw Exception("New note not created")
         }
-        return NoteWithLinks(getNote(uuid), getParentLinks(uuid).toSet())
+        return NoteWithParents(getNote(uuid), getParentLinks(uuid).toSet())
+    }
+
+    override suspend fun getNoteWithChildren(uuid: String): NoteWithChildren {
+        return NoteWithChildren(getNote(uuid), getChildrenIds(uuid))
     }
 
     override suspend fun saveNote(note: Note, parents: Set<DictionaryElement>) {
@@ -180,6 +204,18 @@ class NoteRepository (
             ?.map { it.id }
             ?: emptyList()
     }
+
+    private suspend fun getChildrenIds(noteId: String) : List<String> {
+        return firestore.collection(USER_COLLECTION)
+            .document(user.id)
+            .collection(NOTES_COLLECTION)
+            .document(noteId)
+            .collection(CHILD_LINKS_COLLECTION)
+            .get()
+            .await()
+            ?.map { it.id }
+            ?: emptyList()
+    }
 }
 
 private fun Note.toMap() : Map<String, Any> {
@@ -190,7 +226,8 @@ private fun Note.toMap() : Map<String, Any> {
         "description" to description,
         "color" to color.value.toLong(),
         "start" to start.toInstant().epochSecond,
-        "finish" to finish.toInstant().epochSecond
+        "finish" to finish.toInstant().epochSecond,
+        "root" to root
     )
 }
 
@@ -202,6 +239,7 @@ private fun DocumentSnapshot.toNote() : Note {
         description = data?.get("description") as String,
         color = Color(data?.get("color") as Long),
         start = ZonedDateTime.ofInstant(Instant.ofEpochSecond(data?.get("start") as Long), ZoneId.systemDefault()),
-        finish = ZonedDateTime.ofInstant(Instant.ofEpochSecond(data?.get("finish") as Long), ZoneId.systemDefault())
+        finish = ZonedDateTime.ofInstant(Instant.ofEpochSecond(data?.get("finish") as Long), ZoneId.systemDefault()),
+        root = (data?.get("root") ?: false) as Boolean
     )
 }

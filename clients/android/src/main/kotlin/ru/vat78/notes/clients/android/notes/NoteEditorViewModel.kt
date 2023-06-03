@@ -6,7 +6,7 @@ import ru.vat78.notes.clients.android.ApplicationContext
 import ru.vat78.notes.clients.android.base.BaseViewModel
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
-import ru.vat78.notes.clients.android.data.NoteWithLinks
+import ru.vat78.notes.clients.android.data.NoteWithParents
 
 class NoteEditorViewModel(
     contextHolder: ApplicationContext,
@@ -14,8 +14,8 @@ class NoteEditorViewModel(
 
     private val reducer = NoteEditorUiReducer(
         initial = NoteEditorUiState(
-            origin = NoteWithLinks(Note(""), emptySet()),
-            changed = NoteWithLinks(Note(""), emptySet()),
+            origin = NoteWithParents(Note(""), emptySet()),
+            changed = NoteWithParents(Note(""), emptySet()),
             noteType = NoteType(),
             availableTypes = emptyList(),
             status = EditFormState.NEW,

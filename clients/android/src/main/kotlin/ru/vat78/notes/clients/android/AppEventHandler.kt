@@ -16,6 +16,7 @@ class AppEventHandler(
                 coroutineScope.launch {
                     context.setUser(event.user)
                     Log.i("Auth event", "User ${event.user?.name} authenticated")
+                    context.riseEvent(AppEvent.InitUser(event.user))
                 }
             }
 

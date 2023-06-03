@@ -6,6 +6,7 @@ import android.Manifest
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
@@ -71,7 +72,7 @@ fun GraphNotesApp() {
         }
 
         val appState = rememberAppState()
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         // Intercepts back navigation when the drawer is open
         val scope = rememberCoroutineScope()
         if (drawerState.isOpen) {
@@ -87,6 +88,10 @@ fun GraphNotesApp() {
             drawerContent = {
                 DrawerNavigationMenu({appState.context.services.noteTypeStorage.types.values}) {
                     appState.navigate(it)
+                    Log.i("DrawerNavigationMenu", "Selected $it")
+                    scope.launch {
+                        drawerState.close()
+                    }
                 }
             }
         ) {
@@ -98,8 +103,6 @@ fun GraphNotesApp() {
                         onSignIn = { appState.context.riseEvent(AppEvent.OnAuth(it)) },
                         onFailure = { appState.context.riseEvent(AppEvent.OnAuth(null)) },
                     )
-                } else {
-                    appState.context.riseEvent(AppEvent.InitUser(user.value))
                 }
 
                 Scaffold(
