@@ -11,9 +11,10 @@ interface NoteTypeStorage {
 }
 
 interface NoteStorage {
-    suspend fun getNotes(types: List<String> = emptyList()): List<Note>
+    suspend fun getNotes(filter: NotesFilter): List<Note>
     fun buildNewNote(type: NoteType, text: String, parent: Note? = null)
-    suspend fun getNoteForEdit(uuid: String): NoteWithLinks
+    suspend fun getNoteWithParents(uuid: String): NoteWithParents
+    suspend fun getNoteWithChildren(uuid: String): NoteWithChildren
     suspend fun saveNote(note: Note, parents: Set<DictionaryElement>)
 }
 
@@ -25,7 +26,7 @@ abstract class TagSearchService {
 
     // ToDo: add filtering by time of availability of tags
     // ToDo: add statistics of usage of suggestions and ordering by it
-    suspend fun searchTagSuggestions(text: String, note: NoteWithLinks, typeInfoSource: (String) -> NoteType): List<DictionaryElement> {
+    suspend fun searchTagSuggestions(text: String, note: NoteWithParents, typeInfoSource: (String) -> NoteType): List<DictionaryElement> {
         val existingLinks = note.parents
         val excludedTags = existingLinks.map { it.id }.toSet() + note.note.id
         val excludedTypes = existingLinks.asSequence()
@@ -63,3 +64,10 @@ interface AppContext {
     val noteStorage: NoteStorage
     val tagSearchService: TagSearchService
 }
+
+data class NotesFilter (
+    val noteIdsForLoad: List<String>? = null,
+    val typesToLoad: List<String>? = null,
+    val typesToExclude: List<String>? = null,
+    val onlyRoots: Boolean = false
+)

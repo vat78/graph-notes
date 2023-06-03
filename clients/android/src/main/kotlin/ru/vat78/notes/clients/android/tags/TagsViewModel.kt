@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.StateFlow
 import ru.vat78.notes.clients.android.ApplicationContext
 import ru.vat78.notes.clients.android.base.BaseViewModel
+import ru.vat78.notes.clients.android.notes.ListState
 
 class TagsViewModel(
     contextHolder: ApplicationContext,
@@ -11,7 +12,7 @@ class TagsViewModel(
 
     private val reducer = TagsUiReducer(
         initial = TagsUiState(
-
+            state = ListState.INIT
         ),
         contextHolder = contextHolder,
         viewModelScope = viewModelScope

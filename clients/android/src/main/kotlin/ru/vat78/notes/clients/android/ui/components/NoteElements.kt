@@ -1,7 +1,11 @@
 package ru.vat78.notes.clients.android.ui.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Dp
@@ -41,4 +45,14 @@ fun TagsCloud(
             }
         }
     }
+}
+
+@Composable
+fun RowScope.SectionHeaderLine() {
+    Divider(
+        modifier = Modifier
+            .weight(1f)
+            .align(Alignment.CenterVertically),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+    )
 }

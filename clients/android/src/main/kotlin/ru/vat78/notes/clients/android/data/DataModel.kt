@@ -13,13 +13,20 @@ data class Note(
     val color: Color = Color.Transparent,
     val description: String = "",
     val start: ZonedDateTime = ZonedDateTime.now(),
-    val finish: ZonedDateTime = ZonedDateTime.now()
+    val finish: ZonedDateTime = ZonedDateTime.now(),
+    val root: Boolean = false
 )
 
 @Immutable
-data class NoteWithLinks(
+data class NoteWithParents(
     val note: Note,
     val parents: Set<DictionaryElement> = emptySet(),
+)
+
+@Immutable
+data class NoteWithChildren(
+    val note: Note,
+    val children: List<String> = emptyList(),
 )
 
 @Immutable

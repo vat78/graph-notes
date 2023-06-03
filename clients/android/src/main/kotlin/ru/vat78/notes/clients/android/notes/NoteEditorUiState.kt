@@ -5,7 +5,7 @@ import ru.vat78.notes.clients.android.base.UiEvent
 import ru.vat78.notes.clients.android.base.UiState
 import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.NoteType
-import ru.vat78.notes.clients.android.data.NoteWithLinks
+import ru.vat78.notes.clients.android.data.NoteWithParents
 import java.time.ZonedDateTime
 
 enum class EditFormState {
@@ -17,8 +17,8 @@ enum class EditFormState {
 
 @Immutable
 data class NoteEditorUiState(
-    val origin: NoteWithLinks,
-    val changed: NoteWithLinks,
+    val origin: NoteWithParents,
+    val changed: NoteWithParents,
     val noteType: NoteType,
     val availableTypes: Collection<NoteType>,
     val status: EditFormState = EditFormState.NEW,

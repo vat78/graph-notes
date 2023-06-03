@@ -57,7 +57,7 @@ fun DrawerNavigationMenu(
                     MenuItem(
                         TmpIcons[type.icon] ?: Icons.Filled.Note,
                         type.name, false
-                    ) { onClickNavigate(type.id) }
+                    ) { onClickNavigate("${TagListScreen.route}/${type.id}") }
             }
         }
     }

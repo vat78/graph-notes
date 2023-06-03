@@ -10,9 +10,14 @@ import ru.vat78.notes.clients.android.data.NoteType
 class NotesUiState(
     val caption: String,
     val notes: List<Note>,
-    val noteTypes: List<NoteType> = emptyList(),
+    val state: ListState = ListState.INIT,
+    val noteTypes: Map<String, NoteType> = emptyMap()
 ) : UiState {
 
+}
+
+enum class ListState {
+    INIT, LOADING, LOADED
 }
 
 sealed class NotesUiEvent: UiEvent {
@@ -22,6 +27,6 @@ sealed class NotesUiEvent: UiEvent {
     ): NotesUiEvent()
 
     data class LoadNotes(
-        val types: List<String>
+        val allNotes: Boolean
     ): NotesUiEvent()
 }

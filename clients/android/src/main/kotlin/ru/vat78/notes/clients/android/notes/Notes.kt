@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
@@ -24,8 +23,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.filled.Note
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -46,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -57,16 +54,18 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.ApplicationContext
 import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.data.NoteType
+import ru.vat78.notes.clients.android.data.TmpIcons
 import ru.vat78.notes.clients.android.ui.components.FunctionalityNotAvailablePopup
 import ru.vat78.notes.clients.android.ui.components.InfoIcon
 import ru.vat78.notes.clients.android.ui.components.JumpToBegin
 import ru.vat78.notes.clients.android.ui.components.NotesAppBar
 import ru.vat78.notes.clients.android.ui.components.SearchIcon
+import ru.vat78.notes.clients.android.ui.components.SectionHeaderLine
 import ru.vat78.notes.clients.android.ui.components.SymbolAnnotationType
 import ru.vat78.notes.clients.android.ui.components.messageFormatter
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 import java.time.LocalDate
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,7 +74,7 @@ fun NoteListContent(
     viewModel: NotesViewModel,
     modifier: Modifier = Modifier,
     onNavIconPressed: () -> Unit = { },
-    onNoteClick: (String) -> Unit = { },
+    onNoteClick: (Note) -> Unit = { },
     onCreateNote: () -> Unit = { },
 ) {
 
@@ -85,7 +84,9 @@ fun NoteListContent(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
     val scope = rememberCoroutineScope()
 
-    viewModel.sendEvent(NotesUiEvent.LoadNotes(emptyList()))
+    if (uiState.state == ListState.INIT) {
+        viewModel.sendEvent(NotesUiEvent.LoadNotes(allNotes = true))
+    }
 
     Surface(modifier = modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -96,6 +97,7 @@ fun NoteListContent(
             ) {
                 Notes(
                     uiState.notes,
+                    noteTypeHolder = { uiState.noteTypes[it] },
                     modifier = Modifier.weight(1f),
                     scrollState = scrollState,
                     onNoteClick = onNoteClick
@@ -132,7 +134,8 @@ fun NotesTopBar(
     caption: String,
     modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    onNavIconPressed: () -> Unit = { }
+    onNavIconPressed: () -> Unit = { },
+    onCaptionPressed: () -> Unit = { },
 ) {
     var functionalityNotAvailablePopupShown by remember { mutableStateOf(false) }
     if (functionalityNotAvailablePopupShown) {
@@ -147,7 +150,8 @@ fun NotesTopBar(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = caption,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.clickable(onClick = onCaptionPressed)
                 )
             }
         },
@@ -161,9 +165,10 @@ fun NotesTopBar(
 @Composable
 fun Notes(
     notes: List<Note>,
+    noteTypeHolder: (String) -> NoteType?,
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
-    onNoteClick: (String) -> Unit = { },
+    onNoteClick: (Note) -> Unit = { },
 ) {
     val scope = rememberCoroutineScope()
     Box(modifier = modifier) {
@@ -188,10 +193,8 @@ fun Notes(
 
                 item {
                     NoteShort(
-                        uuid = content.id,
-                        caption = content.caption,
-                        description = content.description,
-                        time = content.start,
+                        note = content,
+                        noteType = noteTypeHolder.invoke(content.type),
                         onNoteClick = onNoteClick
                     )
                 }
@@ -223,29 +226,26 @@ fun Notes(
 
 @Composable
 fun NoteShort(
-    uuid: String,
-    caption: String,
-    description: String,
-    time: ZonedDateTime,
-    icon: ImageVector = Icons.Filled.Info,
+    note: Note,
+    noteType: NoteType?,
     color: Color = MaterialTheme.colorScheme.tertiary,
-    onNoteClick: (String) -> Unit = { }
+    onNoteClick: (Note) -> Unit = { }
 ) {
     val uriHandler = LocalUriHandler.current
 
-    val styledMessage = messageFormatter(description)
+    val styledMessage = messageFormatter(note.description)
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         Surface(
             color = color,
             shape = RoundedCornerShape(8.dp, 8.dp, 8.dp, 8.dp),
-            modifier = Modifier.fillMaxWidth().clickable { onNoteClick(uuid) }
+            modifier = Modifier.fillMaxWidth().clickable { onNoteClick(note) }
         ) {
             Column {
                 Row (modifier = Modifier.fillMaxWidth()) {
                     Icon(
-                        imageVector = icon,
+                        imageVector = TmpIcons[noteType?.icon] ?: Icons.Filled.Note,
                         contentDescription = null,
                         modifier = Modifier
                             .padding(start = 8.dp, top = 8.dp)
@@ -253,7 +253,7 @@ fun NoteShort(
                     )
                     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = caption,
+                            text = note.caption,
                             maxLines = 1,
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 color = LocalContentColor.current,
@@ -266,7 +266,7 @@ fun NoteShort(
                             modifier = Modifier.align(Alignment.TopEnd)
                         ) {
                             Text(
-                                text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
+                                text = note.finish.format(DateTimeFormatter.ofPattern("HH:mm")),
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     color = LocalContentColor.current,
                                     fontStyle = FontStyle.Italic
@@ -276,7 +276,7 @@ fun NoteShort(
                         }
                     }
                 }
-                if (description.isNotBlank()) {
+                if (note.description.isNotBlank()) {
                     ClickableText(
                         text = styledMessage,
                         maxLines = 4,
@@ -310,25 +310,15 @@ fun DayHeader(day: LocalDate) {
             .height(16.dp)
     ) {
         val dayString = if (day == LocalDate.now()) "Today" else day.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
-        DayHeaderLine()
+        SectionHeaderLine()
         Text(
             text = dayString,
             modifier = Modifier.padding(horizontal = 16.dp),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        DayHeaderLine()
+        SectionHeaderLine()
     }
-}
-
-@Composable
-private fun RowScope.DayHeaderLine() {
-    Divider(
-        modifier = Modifier
-            .weight(1f)
-            .align(Alignment.CenterVertically),
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-    )
 }
 
 private val JumpToBottomThreshold = 56.dp

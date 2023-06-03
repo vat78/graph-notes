@@ -11,7 +11,7 @@ class NotesViewModel(
 
     private val reducer = NotesUiReducer(
         initial = NotesUiState(
-            caption = "Test",
+            caption = "Timeline",
             notes = emptyList()
         ),
         contextHolder = contextHolder,

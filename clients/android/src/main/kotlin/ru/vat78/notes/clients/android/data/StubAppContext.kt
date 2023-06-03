@@ -19,7 +19,7 @@ class StubAppContext : AppContext {
     private val parentChild: MutableMap<String, MutableSet<String>> = mutableMapOf()
     private val childParent: MutableMap<String, MutableSet<String>> = mutableMapOf()
 
-    lateinit var newNote: NoteWithLinks
+    lateinit var newNote: NoteWithParents
 
     override val user: User
         get() = User("0", "ANONIMUS", email = "anonimus@test.org")
@@ -43,9 +43,11 @@ class StubAppContext : AppContext {
         }
     override val noteStorage: NoteStorage
         get() = object: NoteStorage {
-            override suspend fun getNotes(types: List<String>): List<Note> {
-               return notes.filter {
-                    types.isEmpty() || types.contains(it.type)
+            override suspend fun getNotes(filter: NotesFilter): List<Note> {
+                return notes.filter {
+                               filter.typesToLoad?.contains(it.type) ?: true
+                            && filter.noteIdsForLoad?.contains(it.id) ?: true
+                            && !(filter.typesToExclude?.contains(it.type) ?: false)
                 }.sortedBy { it.start }
             }
 
@@ -70,13 +72,17 @@ class StubAppContext : AppContext {
                     }
                 }
                 newNote = if (parent == null) {
-                    NoteWithLinks(note, emptySet())
+                    NoteWithParents(note, emptySet())
                 } else {
-                    NoteWithLinks(note, setOf(DictionaryElement(parent)))
+                    NoteWithParents(note, setOf(DictionaryElement(parent)))
                 }
             }
 
-            override suspend fun getNoteForEdit(uuid: String): NoteWithLinks {
+            override suspend fun getNoteWithParents(uuid: String): NoteWithParents {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun getNoteWithChildren(uuid: String): NoteWithChildren {
                 TODO("Not yet implemented")
             }
 
