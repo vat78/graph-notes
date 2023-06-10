@@ -12,20 +12,16 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.Surface
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -73,8 +69,11 @@ fun GraphNotesApp() {
 
         val appState = rememberAppState()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        // Intercepts back navigation when the drawer is open
         val scope = rememberCoroutineScope()
+        val userLoginScreen = remember { mutableStateOf(false) }
+        val currentUser = appState.context.currentUser.collectAsState(null)
+
+        // Intercepts back navigation when the drawer is open
         if (drawerState.isOpen) {
             BackHandler {
                 scope.launch {
@@ -86,7 +85,7 @@ fun GraphNotesApp() {
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
-                DrawerNavigationMenu({appState.context.services.noteTypeStorage.types.values}) {
+                DrawerNavigationMenu({ appState.context.services.noteTypeStorage.types.values }) {
                     appState.navigate(it)
                     Log.i("DrawerNavigationMenu", "Selected $it")
                     scope.launch {
@@ -95,39 +94,28 @@ fun GraphNotesApp() {
                 }
             }
         ) {
-            Surface(color = MaterialTheme.colors.background) {
-                val user = appState.context.currentUser.collectAsState(null)
-
-                if (user.value == null) {
-                    FirebaseAuthentication(
-                        onSignIn = { appState.context.riseEvent(AppEvent.OnAuth(it)) },
-                        onFailure = { appState.context.riseEvent(AppEvent.OnAuth(null)) },
-                    )
-                }
-
-                Scaffold(
-                    snackbarHost = {
-                        SnackbarHost(
-                            hostState = it,
-                            modifier = Modifier.padding(8.dp),
-                            snackbar = { snackbarData ->
-                                Snackbar(snackbarData, contentColor = MaterialTheme.colors.onPrimary)
-                            }
-                        )
-                    },
-                    scaffoldState = appState.scaffoldState
-                ) { innerPadding ->
-                    GraphNotesNavHost(
-                        appState = appState,
-                        modifier = Modifier.padding(innerPadding),
-                        onNavIconPressed = {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        }
-                    )
-                }
+            if (userLoginScreen.value) {
+                userLoginScreen.value = false
+                FirebaseAuthentication(
+                    onSignIn = { appState.context.riseEvent(AppEvent.OnAuth(it)) },
+                    onFailure = { appState.context.riseEvent(AppEvent.OnAuth(null)) },
+                )
             }
+
+            if (currentUser.value != null) {
+                GraphNotesNavHost(
+                    appState = appState,
+                    modifier = Modifier.padding(8.dp),
+                    onNavIconPressed = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }
+                )
+            }
+        }
+        LaunchedEffect(appState) {
+            userLoginScreen.value = true
         }
     }
 }
@@ -146,13 +134,13 @@ fun RequestNotificationPermissionDialog() {
 
 @Composable
 fun rememberAppState(
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     navController: NavHostController = rememberNavController(),
     resources: Resources = resources(),
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) =
-    remember(scaffoldState, navController, resources, coroutineScope) {
-        AppState(scaffoldState, navController, resources, coroutineScope)
+    remember(snackbarHostState, navController, resources, coroutineScope) {
+        AppState(snackbarHostState, navController, resources, coroutineScope)
     }
 
 @Composable
@@ -161,3 +149,4 @@ fun resources(): Resources {
     LocalConfiguration.current
     return LocalContext.current.resources
 }
+

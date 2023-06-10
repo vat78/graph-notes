@@ -3,6 +3,7 @@ package ru.vat78.notes.clients.android.ui.theme
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -88,7 +89,7 @@ fun GraphNotesTheme(
         else -> GraphNotesLightColorScheme
     }
 
-    androidx.compose.material3.MaterialTheme(
+    MaterialTheme(
         colorScheme = myColorScheme,
         typography = NotesTypography,
         content = content
