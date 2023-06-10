@@ -9,10 +9,6 @@ sealed class AppEvent {
         val user: User?
     ) : AppEvent()
 
-    data class InitUser(
-        val user: User?
-    ) : AppEvent()
-
     data class NoteSaved(
         val previousVersion: Note,
         val newValue: Note

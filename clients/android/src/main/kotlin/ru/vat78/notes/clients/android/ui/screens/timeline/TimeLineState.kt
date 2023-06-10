@@ -1,32 +1,24 @@
-package ru.vat78.notes.clients.android.notes
+package ru.vat78.notes.clients.android.ui.screens.timeline
 
-import androidx.compose.runtime.Immutable
+import ru.vat78.notes.clients.android.base.ListState
 import ru.vat78.notes.clients.android.base.UiEvent
 import ru.vat78.notes.clients.android.base.UiState
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
 
-@Immutable
-class NotesUiState(
+data class TimeLineState(
     val caption: String,
     val notes: List<Note>,
-    val state: ListState = ListState.INIT,
-    val noteTypes: Map<String, NoteType> = emptyMap()
-) : UiState {
+    val state: ListState
+) : UiState
 
-}
-
-enum class ListState {
-    INIT, LOADING, LOADED
-}
-
-sealed class NotesUiEvent: UiEvent {
+sealed class TimeLineEvent() : UiEvent {
     data class CreateNote(
         val text: String,
         val type: NoteType? = null
-    ): NotesUiEvent()
+    ): TimeLineEvent()
 
     data class LoadNotes(
         val allNotes: Boolean
-    ): NotesUiEvent()
+    ): TimeLineEvent()
 }

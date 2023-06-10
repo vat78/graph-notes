@@ -14,18 +14,8 @@ class AppEventHandler(
         when (event) {
             is AppEvent.OnAuth -> {
                 coroutineScope.launch {
-                    context.setUser(event.user)
                     Log.i("Auth event", "User ${event.user?.name} authenticated")
-                    context.riseEvent(AppEvent.InitUser(event.user))
-                }
-            }
-
-            is AppEvent.InitUser -> {
-                coroutineScope.launch {
-                    Log.i("Auth event", "Init context for user ${event.user?.name}")
-                    context.services.userStorage.saveUser(event.user)
-                    context.services.noteTypeStorage.reload()
-                    Log.i("Auth event", "All action for user ${event.user?.name} are triggered")
+                    context.setUser(event.user)
                 }
             }
 

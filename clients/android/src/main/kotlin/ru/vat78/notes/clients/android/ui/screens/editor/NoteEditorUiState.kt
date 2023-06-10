@@ -1,4 +1,4 @@
-package ru.vat78.notes.clients.android.notes
+package ru.vat78.notes.clients.android.ui.screens.editor
 
 import androidx.compose.runtime.Immutable
 import ru.vat78.notes.clients.android.base.UiEvent
@@ -21,7 +21,7 @@ data class NoteEditorUiState(
     val changed: NoteWithParents,
     val noteType: NoteType,
     val availableTypes: Collection<NoteType>,
-    val status: EditFormState = EditFormState.NEW,
+    val status: EditFormState,
     val suggestions: List<DictionaryElement> = emptyList()
 ) : UiState
 
@@ -38,29 +38,29 @@ sealed class NotesEditorUiEvent: UiEvent {
         val isNew: Boolean
     ): NotesEditorUiEvent()
 
-    data class CancelChanges(
-        val text: String
-    ): NotesEditorUiEvent()
+    object CancelChanges: NotesEditorUiEvent()
 
-    data class ChangeCaption(
-        val text: String
-    ): NotesEditorUiEvent()
+    sealed class ChangeEvent : NotesEditorUiEvent() {
+        data class ChangeCaption(
+            val text: String
+        ) : ChangeEvent()
 
-    data class ChangeDescription(
-        val text: String
-    ): NotesEditorUiEvent()
+        data class ChangeDescription(
+            val text: String
+        ) : ChangeEvent()
 
-    data class ChangeType(
-        val type: NoteType
-    ): NotesEditorUiEvent()
+        data class ChangeType(
+            val type: NoteType
+        ) : ChangeEvent()
 
-    data class ChangeStart(
-        val startTime: ZonedDateTime
-    ): NotesEditorUiEvent()
+        data class ChangeStart(
+            val startTime: ZonedDateTime
+        ) : ChangeEvent()
 
-    data class ChangeFinish(
-        val finishTime: ZonedDateTime
-    ): NotesEditorUiEvent()
+        data class ChangeFinish(
+            val finishTime: ZonedDateTime
+        ) : ChangeEvent()
+    }
 
     data class AlignStartTime(
         val currentValue: ZonedDateTime

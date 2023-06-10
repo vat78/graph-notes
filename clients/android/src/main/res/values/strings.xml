@@ -28,4 +28,10 @@
     <string name="notification_permission_description">The notification permission is important for this app. Please grant the permission.</string>
     <string name="notification_permission_settings">The notification permission is important for this app. Please navigate to your device settings and enable notifications for Make it So.</string>
 
+    <!-- Note edit form -->
+    <string name="save_alert_title">Exit without saving</string>
+    <string name="save_alert_text">All changes will be lost if you continue to exit</string>
+    <string name="save_alert_confirm_button">Exit</string>
+    <string name="save_alert_cancel_button">Cancel</string>
+    <string name="tags_input_hint">Enter tag name</string>
 </resources>

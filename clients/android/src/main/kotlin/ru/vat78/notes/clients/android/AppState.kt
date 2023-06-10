@@ -1,12 +1,12 @@
 package ru.vat78.notes.clients.android
 
 import android.content.res.Resources
-import androidx.compose.material.ScaffoldState
+import androidx.compose.material3.SnackbarHostState
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.CoroutineScope
 
 class AppState(
-    val scaffoldState: ScaffoldState,
+    val snackbarHostState: SnackbarHostState,
     val navController: NavHostController,
     private val resources: Resources,
     val coroutineScope: CoroutineScope,

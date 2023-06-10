@@ -1,4 +1,4 @@
-package ru.vat78.notes.clients.android.notes
+package ru.vat78.notes.clients.android.ui.components
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -55,7 +55,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.vat78.notes.clients.android.R
-import ru.vat78.notes.clients.android.ui.components.FunctionalityNotAvailablePanel
 
 enum class InputSelector {
     NONE,

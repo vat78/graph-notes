@@ -34,7 +34,10 @@ class ApplicationContext {
 
     suspend fun setUser(user: User?) {
         _services = if (user == null) stubContext else FirestoreContext(user)
-        currentUser.emit(user)
+        val newUser = user ?: services.user
+        services.userStorage.saveUser(newUser)
+        services.noteTypeStorage.reload()
+        currentUser.emit(newUser)
         Log.i("Application context", "The current user has been changed on ${user?.name}")
     }
 
