@@ -29,14 +29,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.data.Note
-import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.StubAppContext
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 
 @Composable
 fun TagListComponent(
     notes: List<Note>,
-    noteTypesHolder: (String) -> NoteType?,
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
     onNoteClick: (Note) -> Unit = { },
@@ -66,7 +64,7 @@ fun TagListComponent(
                 item {
                     NoteComponent(
                         note = content,
-                        noteType = noteTypesHolder.invoke(content.type),
+                        noteType = content.type,
                         onNoteClick = onNoteClick
                     )
                 }
@@ -124,7 +122,6 @@ fun TagListComponentPreview() {
         Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             TagListComponent(
                 notes = StubAppContext().loadNotes(null).sortedBy { it.caption },
-                noteTypesHolder = { null },
                 scrollState = scrollState
             )
         }
@@ -142,7 +139,6 @@ fun TagListComponentPreviewDark() {
         Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             TagListComponent(
                 notes = StubAppContext().loadNotes(null).sortedBy { it.caption },
-                noteTypesHolder = { null },
                 scrollState = scrollState
             )
         }

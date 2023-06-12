@@ -22,10 +22,10 @@ class AppEventHandler(
             is AppEvent.NoteSaved -> {
                 coroutineScope.launch {
                     if ((event.previousVersion.caption != event.newValue.caption) || (event.previousVersion.type != event.newValue.type)) {
-                        val oldType = context.services.noteTypeStorage.types[event.previousVersion.type]
-                        val newType = context.services.noteTypeStorage.types[event.newValue.type]!!
+                        val oldType = event.previousVersion.type
+                        val newType = event.newValue.type
                         context.services.tagSearchService.updateTagSuggestions(
-                            oldText = if (oldType != null && oldType.tag) event.previousVersion.caption else "",
+                            oldText = if (oldType.tag) event.previousVersion.caption else "",
                             newText = if (newType.tag) event.newValue.caption else "",
                             tagId = event.newValue.id,
                             typeId = newType.id

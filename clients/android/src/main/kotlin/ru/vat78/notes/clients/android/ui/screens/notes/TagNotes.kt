@@ -1,4 +1,4 @@
-package ru.vat78.notes.clients.android.ui.screens.tags
+package ru.vat78.notes.clients.android.ui.screens.notes
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
@@ -28,16 +28,15 @@ import ru.vat78.notes.clients.android.ui.screens.timeline.views.NoteListView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Tags(
-    type: String,
-    rootId: String?,
+fun TagNotes(
+    rootId: String,
     appState: AppState,
     onNavIconPressed: () -> Unit = { },
     onCaptionClick: (Note) -> Unit = { },
     onNoteClick: (Note) -> Unit = { },
     onCreateNote: () -> Unit = { },
 ) {
-    val viewModel = viewModel { TagsViewModel(appState) }
+    val viewModel = viewModel { TagNotesViewModel(appState) }
     val uiState by viewModel.state.collectAsState()
     val snackbarHostState = remember { appState.snackbarHostState }
     val scrollState = rememberLazyListState()
@@ -48,10 +47,10 @@ fun Tags(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TagTopBar(
-                caption = uiState.caption ,
+                caption = uiState.rootNote.caption ,
                 scrollBehavior = scrollBehavior,
                 onNavIconPressed = onNavIconPressed,
-                onCaptionPressed = {uiState.rootNote?.let(onCaptionClick)}
+                onCaptionPressed = {uiState.rootNote.let(onCaptionClick)}
             )
         },
         // Exclude ime and navigation bar padding so this can be added by the UserInput composable
@@ -62,12 +61,12 @@ fun Tags(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         content = {padding ->
             NoteListView(
-                uiState.tags,
+                uiState.notes,
                 scrollState = scrollState,
                 modifier = Modifier.fillMaxSize().padding(padding),
                 onNoteClick = onNoteClick,
                 onCreateNote = { content ->
-                    viewModel.sendEvent(TagsUiEvent.CreateTag(uiState.tagType, content, uiState.rootNote))
+                    viewModel.sendEvent(TagNotesUiEvent.CreateTag(content, uiState.rootNote))
                     onCreateNote()
                 }
             )
@@ -75,6 +74,6 @@ fun Tags(
     )
 
     LaunchedEffect(viewModel) {
-        viewModel.sendEvent(TagsUiEvent.LoadData(type, rootId))
+        viewModel.sendEvent(TagNotesUiEvent.LoadData(rootId))
     }
 }

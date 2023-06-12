@@ -28,7 +28,6 @@ fun TagListView(
     Column(modifier = modifier) {
         TagListComponent(
             notes,
-            noteTypesHolder = { null },
             modifier = Modifier.weight(1f),
             scrollState = scrollState,
             onNoteClick = onNoteClick

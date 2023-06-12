@@ -7,7 +7,7 @@ import java.util.*
 
 @Immutable
 data class Note(
-    val type: String = "",
+    val type: NoteType = NoteType(),
     val id: String = UUID.randomUUID().toString(),
     val caption: String = "",
     val color: Color = Color.Transparent,
@@ -31,8 +31,8 @@ data class NoteWithChildren(
 
 @Immutable
 data class DictionaryElement(
-    val id: String = "",
-    val type: String = "",
+    val id: String,
+    val type: NoteType,
     val caption: String = "",
     val color: Color = Color.Transparent,
 ) {

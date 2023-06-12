@@ -26,13 +26,12 @@ abstract class TagSearchService {
 
     // ToDo: add filtering by time of availability of tags
     // ToDo: add statistics of usage of suggestions and ordering by it
-    suspend fun searchTagSuggestions(text: String, note: NoteWithParents, typeInfoSource: (String) -> NoteType): List<DictionaryElement> {
+    suspend fun searchTagSuggestions(text: String, note: NoteWithParents): List<DictionaryElement> {
         val existingLinks = note.parents
         val excludedTags = existingLinks.map { it.id }.toSet() + note.note.id
         val excludedTypes = existingLinks.asSequence()
             .map { it.type }
             .distinct()
-            .map { typeInfoSource(it) }
             .filter(NoteType::hierarchical)
             .map { it.id }
             .toList()

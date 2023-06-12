@@ -14,6 +14,7 @@ import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteStorage
 import ru.vat78.notes.clients.android.data.NoteType
+import ru.vat78.notes.clients.android.data.NoteTypeStorage
 import ru.vat78.notes.clients.android.data.NoteWithChildren
 import ru.vat78.notes.clients.android.data.NoteWithParents
 import ru.vat78.notes.clients.android.data.NotesFilter
@@ -24,9 +25,13 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 class NoteRepository (
-    val user: User,
-    val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val user: User,
+    private val noteTypeRepository: NoteTypeStorage,
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : NoteStorage {
+
+    private val noteTypes
+        get() = noteTypeRepository.types
 
     private var newNote: NoteWithParents? = null
 
@@ -59,8 +64,9 @@ class NoteRepository (
                 .orderBy("finish")
                 .get()
                 .await()
-                .map {doc -> doc.toNote()}
+                .map {doc -> doc.toNote(noteTypes)}
         }
+        Log.i("NoteRepository", "Find ${result.size} elements")
         return result
     }
 
@@ -70,14 +76,14 @@ class NoteRepository (
         val note: Note by lazy {
             if (type.tag) {
                 Note(
-                    type = type.id,
+                    type = type,
                     caption = text,
                     start = startTime,
                     finish = finishTime,
                 )
             } else {
                 Note(
-                    type = type.id,
+                    type = type,
                     description = text,
                     start = startTime,
                     finish = finishTime,
@@ -174,7 +180,7 @@ class NoteRepository (
             .document(id)
             .get()
             .await()
-            ?.toNote()
+            ?.toNote(noteTypes)
             ?: throw Exception("Note not found")
     }
 
@@ -189,7 +195,7 @@ class NoteRepository (
             .whereIn("id", ids)
             .get()
             .await()
-            ?.map {doc -> doc.toDictionaryElement()}
+            ?.map {doc -> doc.toDictionaryElement(noteTypes)}
             ?: emptyList()
     }
 
@@ -221,7 +227,7 @@ class NoteRepository (
 private fun Note.toMap() : Map<String, Any> {
     return mapOf(
         "id" to  id,
-        "type" to type,
+        "type" to type.id,
         "caption" to caption,
         "description" to description,
         "color" to color.value.toLong(),
@@ -231,11 +237,11 @@ private fun Note.toMap() : Map<String, Any> {
     )
 }
 
-private fun DocumentSnapshot.toNote() : Note {
+private fun DocumentSnapshot.toNote(types: Map<String, NoteType>) : Note {
     return Note(
         id = data?.get("id") as String,
         caption = data?.get("caption") as String,
-        type = data?.get("type") as String,
+        type = types[data?.get("type") as String]!!,
         description = data?.get("description") as String,
         color = Color(data?.get("color") as Long),
         start = ZonedDateTime.ofInstant(Instant.ofEpochSecond(data?.get("start") as Long), ZoneId.systemDefault()),

@@ -1,19 +1,3 @@
-/*
- * Copyright 2022 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package ru.vat78.notes.clients.android.ui
 
 import android.util.Log
@@ -27,7 +11,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import ru.vat78.notes.clients.android.AppState
+import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.ui.screens.editor.NoteEditor
+import ru.vat78.notes.clients.android.ui.screens.notes.TagNotes
 import ru.vat78.notes.clients.android.ui.screens.tags.Tags
 import ru.vat78.notes.clients.android.ui.screens.timeline.TimeLineScreen
 
@@ -45,20 +31,24 @@ fun GraphNotesNavHost(
         startDestination = NoteListScreen.route,
         modifier = modifier
     ) {
+
+        val toNoteEditAction: (Note) -> Unit = { note ->
+            appState.navigate(
+                route = "${EditNoteScreen.route}/${note.id}"
+            )
+        }
+        val toNewNoteEditAction: () -> Unit = {
+            appState.navigate(
+                route = "${EditNoteScreen.route}/new"
+            )
+        }
+
         composable(route = NoteListScreen.route) {
             Log.i("GraphNotesNavHost", "Route to ${NoteListScreen.route}")
             TimeLineScreen(
                 appState = appState,
-                onNoteClick = { note ->
-                    appState.navigate(
-                        route = "${EditNoteScreen.route}/${note.id}"
-                    )
-                },
-                onCreateNote = {
-                    appState.navigate(
-                        route = "${EditNoteScreen.route}/new"
-                    )
-                },
+                onNoteClick = toNoteEditAction,
+                onCreateNote = toNewNoteEditAction,
                 onNavIconPressed = onNavIconPressed
             )
         }
@@ -104,19 +94,31 @@ fun GraphNotesNavHost(
                         route = "${TagListScreen.route}/${note.type}?root=${note.id}"
                     )
                 },
-                onCreateNote = {
-                    appState.navigate(
-                        route = "${EditNoteScreen.route}/new"
-                    )
-                },
-                onCaptionClick = { note ->
-                    appState.navigate(
-                        route = "${EditNoteScreen.route}/${note.id}"
-                    )
-                },
+                onCreateNote = toNewNoteEditAction,
+                onCaptionClick = toNoteEditAction,
                 onNavIconPressed = onNavIconPressed
             )
         }
 
+        composable(
+            route = TagNotesScreen.routeWithArgs,
+            arguments = listOf(
+                navArgument(TagNotesScreen.rootTag) {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
+        ) { entry ->
+            val rootId  = entry.arguments?.getString(TagNotesScreen.rootTag)
+            Log.i("GraphNotesNavHost", "Route to ${TagNotesScreen.route} with root = $rootId")
+            TagNotes(
+                rootId  = rootId!!,
+                appState = appState,
+                onNoteClick = toNoteEditAction,
+                onCreateNote = toNewNoteEditAction,
+                onCaptionClick = toNoteEditAction,
+                onNavIconPressed = onNavIconPressed
+            )
+        }
     }
 }

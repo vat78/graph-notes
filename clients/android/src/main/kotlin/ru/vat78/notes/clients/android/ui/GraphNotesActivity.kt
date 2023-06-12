@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class,ExperimentalFoundationApi::class,ExperimentalComposeUiApi::class)
-
 package ru.vat78.notes.clients.android.ui
 
 import android.Manifest
@@ -45,6 +43,9 @@ import ru.vat78.notes.clients.android.ui.components.PermissionDialog
 import ru.vat78.notes.clients.android.ui.components.RationaleDialog
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 
+@ExperimentalFoundationApi
+@ExperimentalComposeUiApi
+@ExperimentalMaterial3Api
 class GraphNotesActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +61,9 @@ class GraphNotesActivity : ComponentActivity() {
     }
 }
 
+@ExperimentalFoundationApi
+@ExperimentalComposeUiApi
+@ExperimentalMaterial3Api
 @Composable
 fun GraphNotesApp() {
     GraphNotesTheme {

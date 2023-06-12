@@ -29,7 +29,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.data.Note
-import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.StubAppContext
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 import java.time.LocalDate
@@ -39,7 +38,6 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun NoteListComponent(
     notes: List<Note>,
-    noteTypeHolder: (String) -> NoteType?,
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
     onNoteClick: (Note) -> Unit = { },
@@ -68,7 +66,7 @@ fun NoteListComponent(
                 item {
                     NoteComponent(
                         note = content,
-                        noteType = noteTypeHolder.invoke(content.type),
+                        noteType = content.type,
                         onNoteClick = onNoteClick
                     )
                 }
@@ -129,7 +127,6 @@ fun NoteListComponentPreview() {
         Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             NoteListComponent(
                 notes = StubAppContext().loadNotes(null).sortedBy { it.finish },
-                noteTypeHolder = { null },
                 scrollState = scrollState
             )
         }
@@ -147,7 +144,6 @@ fun NoteListComponentPreviewDark() {
         Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             NoteListComponent(
                 notes = StubAppContext().loadNotes(null).sortedBy { it.finish },
-                noteTypeHolder = { null },
                 scrollState = scrollState
             )
         }

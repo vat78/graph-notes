@@ -18,8 +18,8 @@ import ru.vat78.notes.clients.android.data.User
 import ru.vat78.notes.clients.android.data.defaultTypes
 
 class NoteTypeRepository (
-    val user: User,
-    val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val user: User,
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : NoteTypeStorage {
 
     private var _cache: Map<String, NoteType> = emptyMap()

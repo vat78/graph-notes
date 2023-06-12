@@ -14,8 +14,8 @@ class NoteEditorViewModel(
     private val appState: AppState,
 ) : BaseViewModel<NoteEditorUiState, NotesEditorUiEvent>(
     initialState = NoteEditorUiState(
-        origin = NoteWithParents(Note(""), emptySet()),
-        changed = NoteWithParents(Note(""), emptySet()),
+        origin = NoteWithParents(Note(NoteType()), emptySet()),
+        changed = NoteWithParents(Note(NoteType()), emptySet()),
         noteType = NoteType(),
         status = EditFormState.NEW,
         availableTypes = emptyList()
@@ -48,7 +48,7 @@ class NoteEditorViewModel(
                 origin = oldState.origin,
                 changed = oldState.origin,
                 availableTypes = noteTypes.values,
-                noteType = noteTypes[oldState.origin.note.type]!!,
+                noteType = oldState.origin.note.type,
                 status = EditFormState.NEW
             )
         )
@@ -63,7 +63,7 @@ class NoteEditorViewModel(
                 NoteEditorUiState(
                     origin = note,
                     changed = note,
-                    noteType = noteTypes[note.note.type]!!,
+                    noteType = note.note.type,
                     status = state,
                     availableTypes = noteTypes.values
                 )
@@ -111,7 +111,7 @@ class NoteEditorViewModel(
 
             is NotesEditorUiEvent.ChangeEvent.ChangeType -> {
                 if (oldState.noteType == changeEvent.type) return
-                oldState.changed.note.copy(type = changeEvent.type.id)
+                oldState.changed.note.copy(type = changeEvent.type)
             }
 
             is NotesEditorUiEvent.ChangeEvent.ChangeStart -> {
@@ -162,7 +162,7 @@ class NoteEditorViewModel(
     private fun loadSuggestions(text: String, oldState: NoteEditorUiState) {
         viewModelScope.launch {
             val newSuggestions = services
-                .tagSearchService.searchTagSuggestions(text, oldState.changed) { noteTypes[it]!! }
+                .tagSearchService.searchTagSuggestions(text, oldState.changed)
             _state.emit(
                 oldState.copy(
                     suggestions = newSuggestions
