@@ -9,12 +9,11 @@ import ru.vat78.notes.clients.android.data.NoteType
 
 @Immutable
 data class TagsUiState(
-    val tagType: NoteType? = null,
-    val caption: String = "",
+    val tagType: NoteType,
+    val caption: String,
     val rootNote: Note? = null,
     val tags: List<Note> = emptyList(),
-    val noteTypes: Map<String, NoteType> = emptyMap(),
-    val state: ListState = ListState.LOADED
+    val state: ListState = ListState.INIT
     ) : UiState {
 }
 

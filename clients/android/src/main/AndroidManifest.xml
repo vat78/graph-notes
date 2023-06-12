@@ -18,6 +18,10 @@
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="graph-notes.bat78.ru" android:scheme="https" />
             </intent-filter>
         </activity>
     </application>

@@ -28,7 +28,6 @@ fun NoteListView(
     Column(modifier = modifier) {
         NoteListComponent(
             notes,
-            noteTypeHolder = { null },
             modifier = Modifier.weight(1f),
             scrollState = scrollState,
             onNoteClick = onNoteClick

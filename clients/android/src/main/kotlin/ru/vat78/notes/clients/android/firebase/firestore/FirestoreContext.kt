@@ -14,6 +14,6 @@ class FirestoreContext(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     override val userStorage: UserStorage = UserRepository(firestore = firestore)
     override val noteTypeStorage: NoteTypeStorage = NoteTypeRepository(user = user, firestore = firestore)
-    override val noteStorage: NoteStorage = NoteRepository(user = user, firestore = firestore)
-    override val tagSearchService: TagSearchService = TagSearchRepository(user = user, firestore = firestore)
+    override val noteStorage: NoteStorage = NoteRepository(user = user, noteTypeRepository = noteTypeStorage, firestore = firestore)
+    override val tagSearchService: TagSearchService = TagSearchRepository(user = user, noteTypeRepository = noteTypeStorage, firestore = firestore)
 }

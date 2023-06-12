@@ -13,6 +13,8 @@ class TagsViewModel(
     private val appState: AppState,
 ) : BaseViewModel<TagsUiState, TagsUiEvent>(
     initialState = TagsUiState(
+        tagType = NoteType(),
+        caption = "",
         state = ListState.INIT
     )
 ) {
@@ -54,7 +56,6 @@ class TagsViewModel(
                     tagType = mainType,
                     caption = mainType.name,
                     tags = values,
-                    noteTypes = noteTypes,
                     state = ListState.LOADED
                 )
             )
@@ -64,7 +65,7 @@ class TagsViewModel(
     private fun loadDataByTag(tag: String) {
         viewModelScope.launch {
             val note = services.noteStorage.getNoteWithChildren(tag)
-            val mainType = noteTypes[note.note.type]!!
+            val mainType = note.note.type
             val values = services.noteStorage.getNotes(
                 NotesFilter(
                     typesToLoad = typesForFiltering(mainType, noteTypes.values),
@@ -75,7 +76,6 @@ class TagsViewModel(
                     tagType = mainType,
                     caption = note.note.caption,
                     tags = values,
-                    noteTypes = noteTypes,
                     rootNote = note.note,
                     state = ListState.LOADED
                 )

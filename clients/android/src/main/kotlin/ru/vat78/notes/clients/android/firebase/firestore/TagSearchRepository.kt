@@ -15,13 +15,19 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import ru.vat78.notes.clients.android.data.DictionaryElement
+import ru.vat78.notes.clients.android.data.NoteType
+import ru.vat78.notes.clients.android.data.NoteTypeStorage
 import ru.vat78.notes.clients.android.data.TagSearchService
 import ru.vat78.notes.clients.android.data.User
 
 class TagSearchRepository(
-    val user: User,
-    val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val user: User,
+    private val noteTypeRepository: NoteTypeStorage,
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : TagSearchService() {
+
+    private val noteTypes
+        get() = noteTypeRepository.types
 
     override suspend fun searchTagSuggestions(
         words: Set<String>,
@@ -44,7 +50,7 @@ class TagSearchRepository(
                 .whereIn("id", ids.toList())
                 .get()
                 .await()
-                .map {doc -> doc.toDictionaryElement()}
+                .map {doc -> doc.toDictionaryElement(noteTypes)}
         }
         return result
     }
@@ -105,11 +111,11 @@ class TagSearchRepository(
     }
 }
 
-fun DocumentSnapshot.toDictionaryElement() : DictionaryElement {
+fun DocumentSnapshot.toDictionaryElement(types: Map<String, NoteType>) : DictionaryElement {
     return DictionaryElement(
         id = data?.get("id") as String,
         caption = data?.get("caption") as String,
-        type = data?.get("type") as String,
+        type = types[data?.get("type") as String]!!,
         color = Color(data?.get("color") as Long)
     )
 }
