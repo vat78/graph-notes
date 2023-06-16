@@ -6,6 +6,7 @@ import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.base.BaseViewModel
 import ru.vat78.notes.clients.android.base.ListState
 import ru.vat78.notes.clients.android.data.NotesFilter
+import ru.vat78.notes.clients.android.data.uploadTextInsertions
 
 class TimeLineViewModel(
     private val appState: AppState,
@@ -46,6 +47,14 @@ class TimeLineViewModel(
                 TimeLineState(
                     caption = oldState.caption,
                     notes = notes,
+                    state = ListState.LOADED
+                )
+            )
+            val filledNotes = uploadTextInsertions(notes, {services.noteStorage.getTags(it) }, { services.noteStorage.updateNote(it) })
+            _state.emit(
+                TimeLineState(
+                    caption = oldState.caption,
+                    notes = filledNotes,
                     state = ListState.LOADED
                 )
             )

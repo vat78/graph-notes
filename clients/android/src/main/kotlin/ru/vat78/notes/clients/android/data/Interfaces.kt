@@ -12,10 +12,12 @@ interface NoteTypeStorage {
 
 interface NoteStorage {
     suspend fun getNotes(filter: NotesFilter): List<Note>
+    suspend fun getTags(filter: NotesFilter): List<DictionaryElement>
     fun buildNewNote(type: NoteType, text: String, parent: Note? = null)
     suspend fun getNoteWithParents(uuid: String): NoteWithParents
     suspend fun getNoteWithChildren(uuid: String): NoteWithChildren
     suspend fun saveNote(note: Note, parents: Set<DictionaryElement>)
+    suspend fun updateNote(note: Note)
 }
 
 abstract class TagSearchService {

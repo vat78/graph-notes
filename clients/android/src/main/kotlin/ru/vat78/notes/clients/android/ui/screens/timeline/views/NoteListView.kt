@@ -22,7 +22,8 @@ fun NoteListView(
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
     onNoteClick: (Note) -> Unit = { },
-    onCreateNote: (String) -> Unit = { }
+    onCreateNote: (String) -> Unit = { },
+    onTagClick: (String) -> Unit = { }
 ) {
     val scope = rememberCoroutineScope()
     Column(modifier = modifier) {
@@ -30,7 +31,8 @@ fun NoteListView(
             notes,
             modifier = Modifier.weight(1f),
             scrollState = scrollState,
-            onNoteClick = onNoteClick
+            onNoteClick = onNoteClick,
+            onTagClick = onTagClick
         )
         SmallNoteEditor(
             onEventInput = onCreateNote,

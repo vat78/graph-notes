@@ -23,6 +23,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.ui.TagNotesScreen
 import ru.vat78.notes.clients.android.ui.screens.timeline.views.NoteListView
 import ru.vat78.notes.clients.android.ui.screens.timeline.views.TimeLineTopBar
 
@@ -65,7 +66,8 @@ fun TimeLineScreen(
                 onCreateNote = { content ->
                     viewModel.sendEvent(TimeLineEvent.CreateNote(text = content))
                     onCreateNote()
-                }
+                },
+                onTagClick = {id -> appState.navigate("${TagNotesScreen.route}/$id")}
             )
         }
     )

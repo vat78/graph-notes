@@ -39,11 +39,12 @@ fun NoteComponent(
     note: Note,
     noteType: NoteType?,
     color: Color = MaterialTheme.colorScheme.tertiary,
-    onNoteClick: (Note) -> Unit = { }
+    onNoteClick: (Note) -> Unit = { },
+    onTagClick: (String) -> Unit = { }
 ) {
     val uriHandler = LocalUriHandler.current
 
-    val styledMessage = messageFormatter(note.description)
+    val styledMessage = messageFormatter(note.description, note.textInsertions)
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
@@ -99,7 +100,7 @@ fun NoteComponent(
                                 ?.let { annotation ->
                                     when (annotation.tag) {
                                         SymbolAnnotationType.LINK.name -> uriHandler.openUri(annotation.item)
-                                        SymbolAnnotationType.TAG.name -> {}
+                                        SymbolAnnotationType.TAG.name -> onTagClick.invoke(annotation.item)
                                         else -> Unit
                                     }
                                 }
