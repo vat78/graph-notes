@@ -90,6 +90,13 @@ class StubAppContext : AppContext {
                 TODO("Not yet implemented")
             }
 
+            override suspend fun getTags(filter: NotesFilter): List<DictionaryElement> {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun updateNote(note: Note) {
+                TODO("Not yet implemented")
+            }
         }
 
     override val tagSearchService: TagSearchService

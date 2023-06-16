@@ -108,7 +108,24 @@ class NoteRepository (
         return NoteWithChildren(getNote(uuid), getChildrenIds(uuid))
     }
 
+    override suspend fun getTags(filter: NotesFilter): List<DictionaryElement> {
+        return getNotes(filter)
+            .map { DictionaryElement(id = it.id, type = it.type, caption = it.caption, color = it.color) }
+    }
+
+    override suspend fun updateNote(note: Note) {
+        Log.i("NoteRepository", "Update note ${note.id}")
+        withContext(Dispatchers.IO) {
+            firestore.collection(USER_COLLECTION)
+                .document(user.id)
+                .collection(NOTES_COLLECTION)
+                .document(note.id)
+                .set(note.toMap(), SetOptions.merge())
+        }
+    }
+
     override suspend fun saveNote(note: Note, parents: Set<DictionaryElement>) {
+        Log.i("NoteRepository", "Save note ${note.id} with its parent links")
         withContext(Dispatchers.IO) {
             val parentsFromDb = getParentIds(note.id).toSet()
             firestore.collection(USER_COLLECTION)
@@ -233,7 +250,8 @@ private fun Note.toMap() : Map<String, Any> {
         "color" to color.value.toLong(),
         "start" to start.toInstant().epochSecond,
         "finish" to finish.toInstant().epochSecond,
-        "root" to root
+        "root" to root,
+        "textInsertions" to textInsertions.values.asSequence().map {e -> Pair(e.id, e.caption) }.toMap()
     )
 }
 
@@ -246,6 +264,13 @@ private fun DocumentSnapshot.toNote(types: Map<String, NoteType>) : Note {
         color = Color(data?.get("color") as Long),
         start = ZonedDateTime.ofInstant(Instant.ofEpochSecond(data?.get("start") as Long), ZoneId.systemDefault()),
         finish = ZonedDateTime.ofInstant(Instant.ofEpochSecond(data?.get("finish") as Long), ZoneId.systemDefault()),
-        root = (data?.get("root") ?: false) as Boolean
+        root = (data?.get("root") ?: false) as Boolean,
+        textInsertions = buildTextInsertions(data?.get("textInsertions"))
     )
+}
+private fun buildTextInsertions(data: Any?): Map<String, DictionaryElement> {
+    if (data == null) return emptyMap()
+    return (data as Map<String, String>).entries.asSequence()
+        .map { e -> Pair(e.key, DictionaryElement(id = e.key, type = NoteType(), caption = e.value)) }
+        .toMap()
 }

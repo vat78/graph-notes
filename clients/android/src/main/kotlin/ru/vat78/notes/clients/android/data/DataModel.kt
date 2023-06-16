@@ -14,7 +14,8 @@ data class Note(
     val description: String = "",
     val start: ZonedDateTime = ZonedDateTime.now(),
     val finish: ZonedDateTime = ZonedDateTime.now(),
-    val root: Boolean = false
+    val root: Boolean = false,
+    val textInsertions: Map<String, DictionaryElement> = emptyMap()
 )
 
 @Immutable

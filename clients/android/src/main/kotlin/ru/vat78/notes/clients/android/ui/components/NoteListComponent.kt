@@ -41,6 +41,7 @@ fun NoteListComponent(
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
     onNoteClick: (Note) -> Unit = { },
+    onTagClick: (String) -> Unit = { }
 ) {
     val scope = rememberCoroutineScope()
     Box(modifier = modifier) {
@@ -67,7 +68,8 @@ fun NoteListComponent(
                     NoteComponent(
                         note = content,
                         noteType = content.type,
-                        onNoteClick = onNoteClick
+                        onNoteClick = onNoteClick,
+                        onTagClick = onTagClick
                     )
                 }
             }

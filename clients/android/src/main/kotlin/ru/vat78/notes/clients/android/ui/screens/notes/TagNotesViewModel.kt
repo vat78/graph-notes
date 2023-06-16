@@ -8,6 +8,7 @@ import ru.vat78.notes.clients.android.base.ListState
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteWithChildren
 import ru.vat78.notes.clients.android.data.NotesFilter
+import ru.vat78.notes.clients.android.data.uploadTextInsertions
 
 class TagNotesViewModel(
     private val appState: AppState,
@@ -41,6 +42,14 @@ class TagNotesViewModel(
             _state.emit(
                 TagNotesUiState(
                     notes = values,
+                    rootNote = note.note,
+                    state = ListState.LOADED
+                )
+            )
+            val filledNotes = uploadTextInsertions(values, {services.noteStorage.getTags(it) }, { services.noteStorage.updateNote(it) })
+            _state.emit(
+                TagNotesUiState(
+                    notes = filledNotes,
                     rootNote = note.note,
                     state = ListState.LOADED
                 )

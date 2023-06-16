@@ -16,9 +16,14 @@
 
 package ru.vat78.notes.clients.android.ui.components
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -28,11 +33,17 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.vat78.notes.clients.android.data.DictionaryElement
+import ru.vat78.notes.clients.android.data.defaultTypes
+import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
+import java.util.UUID
 
 // Regex containing the syntax tokens
 val symbolPattern by lazy {
-    Regex("""(https?://[^\s\t\n]+)|(`[^`]+`)|(@\w+)|(\*[\w\s]+\*)|(_[\w\s]+_)|(~[\w\s]+~)""")
+    Regex("""(https?://[^\s\t\n]+)|(`[^`]+`)|(#\{[\w\-]+\})|(\*[^*]+\*)|(_[^_]+_)|(~[^~]+~)""".trimMargin())
 }
 
 // Accepted annotations for the ClickableTextWrapper
@@ -57,21 +68,25 @@ typealias SymbolAnnotation = Pair<AnnotatedString, StringAnnotation?>
  */
 @Composable
 fun messageFormatter(
-    text: String
+    text: String,
+    tags: Map<String, DictionaryElement>
 ): AnnotatedString {
     val tokens = symbolPattern.findAll(text)
 
     return buildAnnotatedString {
 
         var cursorPosition = 0
+        var newTextPosition = 0
 
         val codeSnippetBackground = MaterialTheme.colorScheme.surface
 
         for (token in tokens) {
             append(text.slice(cursorPosition until token.range.first))
+            newTextPosition += (token.range.first - cursorPosition + 1)
 
             val (annotatedString, stringAnnotation) = getSymbolAnnotation(
                 matchResult = token,
+                tags = tags,
                 colorScheme = MaterialTheme.colorScheme,
                 codeSnippetBackground = codeSnippetBackground
             )
@@ -79,10 +94,11 @@ fun messageFormatter(
 
             if (stringAnnotation != null) {
                 val (item, start, end, tag) = stringAnnotation
-                addStringAnnotation(tag = tag, start = start, end = end, annotation = item)
+                addStringAnnotation(tag = tag, start = start + newTextPosition, end = end + newTextPosition, annotation = item)
             }
 
             cursorPosition = token.range.last + 1
+            newTextPosition += annotatedString.length
         }
 
         if (!tokens.none()) {
@@ -101,25 +117,12 @@ fun messageFormatter(
  */
 private fun getSymbolAnnotation(
     matchResult: MatchResult,
+    tags: Map<String, DictionaryElement>,
     colorScheme: ColorScheme,
     codeSnippetBackground: Color
 ): SymbolAnnotation {
-    return when (matchResult.value.first()) {
-        '@' -> SymbolAnnotation(
-            AnnotatedString(
-                text = matchResult.value,
-                spanStyle = SpanStyle(
-                    color = colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-            ),
-            StringAnnotation(
-                item = matchResult.value.substring(1),
-                start = matchResult.range.first,
-                end = matchResult.range.last,
-                tag = SymbolAnnotationType.TAG.name
-            )
-        )
+    val symbol = matchResult.value.first()
+    return when (symbol) {
         '*' -> SymbolAnnotation(
             AnnotatedString(
                 text = matchResult.value.trim('*'),
@@ -162,11 +165,66 @@ private fun getSymbolAnnotation(
             ),
             StringAnnotation(
                 item = matchResult.value,
-                start = matchResult.range.first,
-                end = matchResult.range.last,
+                start = 0,
+                end = matchResult.value.length,
                 tag = SymbolAnnotationType.LINK.name
             )
         )
+        '#' -> buildTagLink(matchResult, tags, colorScheme.primary)
         else -> SymbolAnnotation(AnnotatedString(matchResult.value), null)
+    }
+}
+
+private fun buildTagLink(matchResult: MatchResult, tags: Map<String, DictionaryElement>, color: Color) : SymbolAnnotation {
+    val text = matchResult.value
+    val id = text.substring(2, text.length - 1)
+    val newText = tags[id]?.caption ?: "Undefined tag"
+    return SymbolAnnotation(
+        AnnotatedString(
+            text = newText,
+            spanStyle = SpanStyle(
+                color = color,
+                fontWeight = FontWeight.Bold
+            )
+        ),
+        StringAnnotation(
+            item = id,
+            start = 0,
+            end = newText.length,
+            tag = SymbolAnnotationType.TAG.name
+        )
+    )
+}
+
+
+@Preview
+@Composable
+fun MessageFormatterPreview() {
+    val uniqueId = UUID.randomUUID().toString()
+    val tags = mapOf(
+        Pair("467c41ed-67fa-4a7d-82e0-6d2fa87459ac", DictionaryElement("467c41ed-67fa-4a7d-82e0-6d2fa87459ac", defaultTypes[1], "test tag 1")),
+        Pair(uniqueId, DictionaryElement(uniqueId, defaultTypes[2], "test tag 2"))
+    )
+    GraphNotesTheme {
+        val styledMessage = messageFormatter("""
+            This is a test message with http://google.com and https://google.com links.
+            With *bold text - and symbols* in the middle.
+            With ~italic text - and symbols~ in the middle.
+            With _underline text - and symbols_ in the middle.
+            With first tag - #{467c41ed-67fa-4a7d-82e0-6d2fa87459ac}.
+            With second tag - #{${uniqueId}}.
+            With #persons with spaces and - symbols@.
+            With &tasks with spaces and - symbols&.
+            With phones +3323424423-234324-234 haha+.
+        """.trimIndent(), tags)
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            ClickableText(
+                text = styledMessage,
+                maxLines = 10,
+                style = MaterialTheme.typography.bodyMedium.copy(color = LocalContentColor.current),
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
+                onClick = {}
+            )
+        }
     }
 }
