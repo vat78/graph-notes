@@ -9,10 +9,10 @@ fun buildSearchBlocks(text: String): Set<String> {
 
 fun getWordsForSearch(text: String): Set<String> {
     val regex = Regex("[^\\p{L}\\p{Nd}]+")
-    return text.split(regex).asSequence().filter { it.length >= 2 }.toSet()
+    return text.split(regex).asSequence().filter { it.length >= 2 }.map { it.lowercase()}.toSet()
 }
 
 private fun splitWordOnTokens(word: String) : Sequence<String> {
     return if (word.length < 2) return emptySequence()
-    else IntRange(2, word.length).asSequence().map { word.substring(0, it) }
+    else IntRange(2, word.length).asSequence().map { word.substring(0, it) }.map { it.lowercase() }
 }

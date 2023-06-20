@@ -51,7 +51,7 @@ class StubAppContext : AppContext {
                 }.sortedBy { it.start }
             }
 
-            override fun buildNewNote(type: NoteType, text: String, parent: Note?) {
+            override fun buildNewNote(type: NoteType, text: String, parent: Note?, insertions: Set<DictionaryElement>) {
                 val startTime = generateTime(type.defaultStart, ZonedDateTime::now)
                 val finishTime = generateTime(type.defaultFinish, ZonedDateTime::now)
                 val note: Note by lazy {

@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.data.Note
-import ru.vat78.notes.clients.android.ui.components.SmallNoteEditor
+import ru.vat78.notes.clients.android.ui.components.SmallTagEditor
 import ru.vat78.notes.clients.android.ui.components.TagListComponent
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 
@@ -32,7 +32,7 @@ fun TagListView(
             scrollState = scrollState,
             onNoteClick = onNoteClick
         )
-        SmallNoteEditor(
+        SmallTagEditor(
             onEventInput = onCreateNote,
             resetScroll = {
                 scope.launch {
@@ -41,7 +41,7 @@ fun TagListView(
             },
             modifier = Modifier
                 .navigationBarsPadding()
-                .imePadding(),
+                .imePadding()
         )
     }
 }

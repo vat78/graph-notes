@@ -23,8 +23,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.ui.screens.tags.views.TagListView
 import ru.vat78.notes.clients.android.ui.screens.tags.views.TagTopBar
-import ru.vat78.notes.clients.android.ui.screens.timeline.views.NoteListView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,8 +61,8 @@ fun Tags(
             .exclude(WindowInsets.ime),
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         content = {padding ->
-            NoteListView(
-                uiState.tags,
+            TagListView(
+                notes = uiState.tags,
                 scrollState = scrollState,
                 modifier = Modifier.fillMaxSize().padding(padding),
                 onNoteClick = onNoteClick,

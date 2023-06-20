@@ -13,7 +13,7 @@ interface NoteTypeStorage {
 interface NoteStorage {
     suspend fun getNotes(filter: NotesFilter): List<Note>
     suspend fun getTags(filter: NotesFilter): List<DictionaryElement>
-    fun buildNewNote(type: NoteType, text: String, parent: Note? = null)
+    fun buildNewNote(type: NoteType, text: String, parent: Note? = null, insertions: Set<DictionaryElement> = emptySet())
     suspend fun getNoteWithParents(uuid: String): NoteWithParents
     suspend fun getNoteWithChildren(uuid: String): NoteWithChildren
     suspend fun saveNote(note: Note, parents: Set<DictionaryElement>)

@@ -70,30 +70,31 @@ class NoteRepository (
         return result
     }
 
-    override fun buildNewNote(type: NoteType, text: String, parent: Note?) {
+    override fun buildNewNote(type: NoteType, text: String, parent: Note?, insertions: Set<DictionaryElement>) {
         val startTime = generateTime(type.defaultStart, ZonedDateTime::now)
         val finishTime = generateTime(type.defaultFinish, ZonedDateTime::now)
         val note: Note by lazy {
             if (type.tag) {
                 Note(
                     type = type,
-                    caption = text,
+                    caption = text.trim(),
                     start = startTime,
                     finish = finishTime,
                 )
             } else {
                 Note(
                     type = type,
-                    description = text,
+                    description = text.trim(),
                     start = startTime,
                     finish = finishTime,
+                    textInsertions = insertions.associateBy { it.id }
                 )
             }
         }
         newNote = if (parent == null) {
-            NoteWithParents(note, emptySet())
+            NoteWithParents(note, insertions)
         } else {
-            NoteWithParents(note, setOf(DictionaryElement(parent)))
+            NoteWithParents(note, insertions + DictionaryElement(parent))
         }
     }
 

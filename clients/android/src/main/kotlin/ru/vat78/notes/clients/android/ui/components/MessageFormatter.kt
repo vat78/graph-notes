@@ -56,7 +56,7 @@ typealias SymbolAnnotation = Pair<AnnotatedString, StringAnnotation?>
 
 /**
  * Format a message following Markdown-lite syntax
- * | @username -> bold, primary color and clickable element
+ * | #{id} -> bold, primary color and clickable element
  * | http(s)://... -> clickable link, opening it into the browser
  * | *bold* -> bold
  * | _italic_ -> italic
