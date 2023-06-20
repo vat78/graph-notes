@@ -9,8 +9,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
+import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.ui.components.NoteListComponent
 import ru.vat78.notes.clients.android.ui.components.SmallNoteEditor
@@ -19,11 +21,15 @@ import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 @Composable
 fun NoteListView(
     notes: List<Note>,
+    suggestions: List<DictionaryElement>,
     scrollState: LazyListState,
+    textState: TextFieldValue,
     modifier: Modifier = Modifier,
     onNoteClick: (Note) -> Unit = { },
     onCreateNote: (String) -> Unit = { },
-    onTagClick: (String) -> Unit = { }
+    onTagClick: (String) -> Unit = { },
+    onTextInput: (TextFieldValue) -> Unit = {},
+    onSelectSuggestion: (DictionaryElement) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     Column(modifier = modifier) {
@@ -44,6 +50,10 @@ fun NoteListView(
             modifier = Modifier
                 .navigationBarsPadding()
                 .imePadding(),
+            textState = textState,
+            suggestions = suggestions,
+            onSelectSuggestion = onSelectSuggestion,
+            onTextChanged = onTextInput
         )
     }
 }
@@ -58,7 +68,10 @@ fun NoteListViewPreview() {
                 Note(caption = "test 1"),
                 Note(caption = "test 2")
             ),
-            scrollState = scrollState)
+            suggestions = emptyList(),
+            scrollState = scrollState,
+            textState = TextFieldValue("")
+        )
     }
 }
 
@@ -70,6 +83,11 @@ fun NoteListViewPreview() {
 fun NoteListViewPreviewDark() {
     val scrollState = rememberLazyListState()
     GraphNotesTheme {
-        NoteListView(notes = emptyList(), scrollState = scrollState)
+        NoteListView(
+            notes = emptyList(),
+            suggestions = emptyList(),
+            scrollState = scrollState,
+            textState = TextFieldValue("")
+        )
     }
 }

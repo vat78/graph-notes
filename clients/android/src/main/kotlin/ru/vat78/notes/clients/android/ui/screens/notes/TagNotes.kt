@@ -23,6 +23,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.ui.TagNotesScreen
 import ru.vat78.notes.clients.android.ui.screens.tags.views.TagTopBar
 import ru.vat78.notes.clients.android.ui.screens.timeline.views.NoteListView
 
@@ -61,14 +62,19 @@ fun TagNotes(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         content = {padding ->
             NoteListView(
-                uiState.notes,
+                notes = uiState.notes,
+                suggestions = uiState.suggestions,
                 scrollState = scrollState,
                 modifier = Modifier.fillMaxSize().padding(padding),
                 onNoteClick = onNoteClick,
                 onCreateNote = { content ->
                     viewModel.sendEvent(TagNotesUiEvent.CreateTag(content, uiState.rootNote))
                     onCreateNote()
-                }
+                },
+                onTagClick = {id -> appState.navigate("${TagNotesScreen.route}/$id")},
+                textState = uiState.inputValue,
+                onTextInput = { newInput -> viewModel.sendEvent(TagNotesUiEvent.NewTextInput(newInput)) },
+                onSelectSuggestion = { tag -> viewModel.sendEvent(TagNotesUiEvent.SelectSuggestion(tag)) }
             )
         }
     )

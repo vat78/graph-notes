@@ -59,7 +59,8 @@ fun TimeLineScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         content = {padding ->
             NoteListView(
-                uiState.notes,
+                notes = uiState.notes,
+                suggestions = uiState.suggestions,
                 scrollState = scrollState,
                 modifier = Modifier.fillMaxSize().padding(padding),
                 onNoteClick = onNoteClick,
@@ -67,7 +68,10 @@ fun TimeLineScreen(
                     viewModel.sendEvent(TimeLineEvent.CreateNote(text = content))
                     onCreateNote()
                 },
-                onTagClick = {id -> appState.navigate("${TagNotesScreen.route}/$id")}
+                onTagClick = {id -> appState.navigate("${TagNotesScreen.route}/$id")},
+                textState = uiState.inputValue,
+                onTextInput = { newInput -> viewModel.sendEvent(TimeLineEvent.NewTextInput(newInput)) },
+                onSelectSuggestion = { tag -> viewModel.sendEvent(TimeLineEvent.SelectSuggestion(tag)) }
             )
         }
     )

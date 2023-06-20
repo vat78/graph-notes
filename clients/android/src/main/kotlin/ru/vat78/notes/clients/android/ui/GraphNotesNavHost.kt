@@ -90,9 +90,15 @@ fun GraphNotesNavHost(
                 rootId  = rootId,
                 appState = appState,
                 onNoteClick = { note ->
-                    appState.navigate(
-                        route = "${TagListScreen.route}/${note.type}?root=${note.id}"
-                    )
+                    if (note.type.hierarchical) {
+                        appState.navigate(
+                            route = "${TagListScreen.route}/${note.type.id}?root=${note.id}"
+                        )
+                    } else {
+                        appState.navigate(
+                            route = "${TagNotesScreen.route}/${note.id}"
+                        )
+                    }
                 },
                 onCreateNote = toNewNoteEditAction,
                 onCaptionClick = toNoteEditAction,

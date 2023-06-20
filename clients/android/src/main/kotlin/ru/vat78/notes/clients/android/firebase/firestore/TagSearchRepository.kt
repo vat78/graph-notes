@@ -2,6 +2,7 @@
 
 package ru.vat78.notes.clients.android.firebase.firestore
 
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -52,6 +53,7 @@ class TagSearchRepository(
                 .await()
                 .map {doc -> doc.toDictionaryElement(noteTypes)}
         }
+        Log.i("TagSearchRepository", "Found ${result.size} tags by words $words")
         return result
     }
 
