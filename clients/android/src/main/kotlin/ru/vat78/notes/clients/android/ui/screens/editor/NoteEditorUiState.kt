@@ -1,6 +1,7 @@
 package ru.vat78.notes.clients.android.ui.screens.editor
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.text.input.TextFieldValue
 import ru.vat78.notes.clients.android.base.UiEvent
 import ru.vat78.notes.clients.android.base.UiState
 import ru.vat78.notes.clients.android.data.DictionaryElement
@@ -15,6 +16,12 @@ enum class EditFormState {
     CLOSED
 }
 
+enum class DescriptionFocusState {
+    HIDE,
+    SHOW,
+    FOCUSED
+}
+
 @Immutable
 data class NoteEditorUiState(
     val origin: NoteWithParents,
@@ -22,6 +29,8 @@ data class NoteEditorUiState(
     val noteType: NoteType,
     val availableTypes: Collection<NoteType>,
     val status: EditFormState,
+    val descriptionFocus: DescriptionFocusState,
+    val descriptionTextValue: TextFieldValue,
     val suggestions: List<DictionaryElement> = emptyList()
 ) : UiState
 
@@ -46,7 +55,7 @@ sealed class NotesEditorUiEvent: UiEvent {
         ) : ChangeEvent()
 
         data class ChangeDescription(
-            val text: String
+            val text: TextFieldValue
         ) : ChangeEvent()
 
         data class ChangeType(
@@ -76,5 +85,9 @@ sealed class NotesEditorUiEvent: UiEvent {
 
     data class RequestSuggestions(
         val text: String
+    ): NotesEditorUiEvent()
+
+    data class ChangeDescriptionFocus(
+        val focus: DescriptionFocusState
     ): NotesEditorUiEvent()
 }
