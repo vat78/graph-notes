@@ -102,7 +102,9 @@ class NoteRepository (
         if (uuid == "new") {
             return newNote ?: throw Exception("New note not created")
         }
-        return NoteWithParents(getNote(uuid), getParentLinks(uuid).toSet())
+        val parents = getParentLinks(uuid).toSet()
+        val note = getNote(uuid).copy(textInsertions = parents.associateBy { it.id })
+        return NoteWithParents(note, parents)
     }
 
     override suspend fun getNoteWithChildren(uuid: String): NoteWithChildren {

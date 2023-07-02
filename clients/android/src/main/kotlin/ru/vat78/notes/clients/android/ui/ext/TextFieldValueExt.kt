@@ -178,3 +178,29 @@ fun String.insertTags(tags: Map<String, DictionaryElement>): String {
         append(text.substring(lastProcessed + 1, text.length))
     }
 }
+fun String.insertCaptions(tags: Map<String, DictionaryElement>): String {
+    val text = this
+    return buildString {
+        var lastProcessed = -1
+        var curSymbol = 0
+        while (curSymbol < text.length) {
+            if (text[curSymbol] == '#' && curSymbol + 1 < text.length && text[curSymbol+1] == '{') {
+                append(text.substring(lastProcessed + 1, curSymbol))
+                curSymbol++
+                lastProcessed = curSymbol
+                do {
+                    curSymbol++
+                } while (curSymbol < text.length && text[curSymbol] != '}')
+                if (curSymbol < text.length) {
+                    val tagId = text.substring(lastProcessed + 1, curSymbol)
+                    append("#")
+                    append(tags[tagId]?.caption ?: "error")
+                    append("#")
+                    lastProcessed = curSymbol
+                }
+            }
+            curSymbol++
+        }
+        append(text.substring(lastProcessed + 1, text.length))
+    }
+}

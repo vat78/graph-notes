@@ -20,13 +20,19 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Note
+import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,18 +43,33 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ru.vat78.notes.clients.android.R
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
+import ru.vat78.notes.clients.android.data.NoteWithParents
 import ru.vat78.notes.clients.android.data.TmpIcons
+import ru.vat78.notes.clients.android.ui.components.SymbolAnnotationType
 import ru.vat78.notes.clients.android.ui.components.TagArea
 import ru.vat78.notes.clients.android.ui.components.TextFieldWithAutocomplete
+import ru.vat78.notes.clients.android.ui.components.messageFormatter
+import ru.vat78.notes.clients.android.ui.screens.editor.DescriptionFocusState
 import ru.vat78.notes.clients.android.ui.screens.editor.NoteEditorUiState
 import ru.vat78.notes.clients.android.ui.screens.editor.NotesEditorUiEvent
 import java.time.ZonedDateTime
@@ -61,7 +82,8 @@ fun NoteEditForm(
     uiState: NoteEditorUiState,
     sendEvent: (NotesEditorUiEvent) -> Unit,
     modifier: Modifier = Modifier,
-    scrollableState: ScrollState = rememberScrollState()
+    scrollableState: ScrollState = rememberScrollState(),
+    onTagClick: (String) -> Unit = { }
 ) {
     val note = uiState.changed.note
     val noteType = uiState.noteType
@@ -82,10 +104,17 @@ fun NoteEditForm(
             )
 
             DescriptionEditor(
-                text = note.description,
+                textFieldValue = uiState.descriptionTextValue,
+                note = uiState.changed,
+                editFormFocused = uiState.descriptionFocus,
                 onChanges = {
                     sendEvent.invoke(NotesEditorUiEvent.ChangeEvent.ChangeDescription(it))
                 },
+                onDescriptionFocus = {
+                    sendEvent.invoke(NotesEditorUiEvent.ChangeDescriptionFocus(it))
+                },
+                onTagClick = onTagClick,
+                modifier = Modifier.fillMaxWidth()
             )
             TimeEditors(
                 note = note,
@@ -208,35 +237,69 @@ fun TypeAndCaption(
 
 @Composable
 fun DescriptionEditor(
-    text: String,
+    textFieldValue: TextFieldValue,
+    note: NoteWithParents,
+    editFormFocused: DescriptionFocusState,
     modifier: Modifier = Modifier,
-    onChanges: (String) -> Unit = {}
+    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.None),
+    onChanges: (TextFieldValue) -> Unit = {},
+    onDescriptionFocus: (DescriptionFocusState) -> Unit = {},
+    onTagClick: (String) -> Unit = { }
 ) {
-    Box(modifier = modifier
-        .fillMaxWidth()
-        .fillMaxHeight(0.3f)
+    Card(
+        modifier = modifier
     ) {
-        TextField(
-            value = text,
-            singleLine = false,
-            onValueChange = {
-                onChanges.invoke(it)
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                containerColor = Color.Transparent,
-            ),
-            textStyle = MaterialTheme.typography.titleMedium.copy(
-                color = LocalContentColor.current,
-                fontWeight = FontWeight.Bold
-            ),
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .fillMaxWidth()
-                .fillMaxHeight()
-        )
+        val focusRequester = remember { FocusRequester() }
+        if (editFormFocused != DescriptionFocusState.HIDE) {
+            val focusManager = LocalFocusManager.current
+            val keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+            BasicTextField(
+                value = textFieldValue,
+                onValueChange = { onChanges.invoke(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp)
+                    .focusRequester(focusRequester)
+                    .onFocusChanged {
+                        if (it.isFocused) {
+                            onDescriptionFocus.invoke(DescriptionFocusState.FOCUSED)
+                        } else {
+                            onDescriptionFocus.invoke(DescriptionFocusState.HIDE)
+                        }
+                    },
+                keyboardOptions = keyboardOptions,
+                keyboardActions = keyboardActions,
+                maxLines = 10,
+                cursorBrush = SolidColor(LocalContentColor.current),
+                textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+                onTextLayout = { focusRequester.requestFocus() }
+            )
+        } else {
+            val uriHandler = LocalUriHandler.current
+            val styledMessage = messageFormatter(note.note.description, note.note.textInsertions)
+            ClickableText(
+                text = styledMessage,
+                maxLines = 4,
+                style = MaterialTheme.typography.bodyMedium.copy(color = LocalContentColor.current),
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
+                onClick = {
+                    val annotation = styledMessage
+                        .getStringAnnotations(start = it, end = it)
+                        .firstOrNull()
+                    if (annotation == null) {
+                        onDescriptionFocus.invoke(DescriptionFocusState.SHOW)
+                    } else {
+                        when (annotation.tag) {
+                            SymbolAnnotationType.LINK.name -> uriHandler.openUri(annotation.item)
+                            SymbolAnnotationType.TAG.name -> onTagClick.invoke(annotation.item)
+                            else -> {
+                                onDescriptionFocus.invoke(DescriptionFocusState.SHOW)
+                            }
+                        }
+                    }
+                }
+            )
+        }
     }
 }
 

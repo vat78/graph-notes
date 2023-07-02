@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.R
+import ru.vat78.notes.clients.android.ui.TagNotesScreen
 import ru.vat78.notes.clients.android.ui.screens.editor.views.NoteEditForm
 
 @ExperimentalMaterial3Api
@@ -79,7 +80,8 @@ fun NoteEditor(
         NoteEditForm(
             uiState = uiState,
             sendEvent = viewModel::sendEvent,
-            modifier = Modifier.padding(it)
+            modifier = Modifier.padding(it),
+            onTagClick = {id -> appState.navigate("${TagNotesScreen.route}/$id")}
         )
     }
 }

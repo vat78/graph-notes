@@ -1,5 +1,7 @@
 package ru.vat78.notes.clients.android.ui.screens.editor
 
+import android.util.Log
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.AppEvent
@@ -9,6 +11,10 @@ import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.NoteWithParents
+import ru.vat78.notes.clients.android.data.getWordsForSearch
+import ru.vat78.notes.clients.android.ui.ext.analyzeTags
+import ru.vat78.notes.clients.android.ui.ext.insertCaptions
+import ru.vat78.notes.clients.android.ui.ext.insertTags
 
 class NoteEditorViewModel(
     private val appState: AppState,
@@ -18,6 +24,8 @@ class NoteEditorViewModel(
         changed = NoteWithParents(Note(NoteType()), emptySet()),
         noteType = NoteType(),
         status = EditFormState.NEW,
+        descriptionFocus = DescriptionFocusState.HIDE,
+        descriptionTextValue = TextFieldValue(""),
         availableTypes = emptyList()
     )
 ) {
@@ -27,6 +35,9 @@ class NoteEditorViewModel(
 
     val noteTypes
         get() = services.noteTypeStorage.types
+
+    private val tagSymbols
+        get() = noteTypes.values.filter { it.symbol.isNotEmpty() }.map { it.symbol.first() }
 
     override fun sendEvent(event: NotesEditorUiEvent) {
         when (event) {
@@ -39,6 +50,7 @@ class NoteEditorViewModel(
             is NotesEditorUiEvent.AddTag -> addTag(event.newTag, state.value)
             is NotesEditorUiEvent.RemoveTag -> removeTag(event.tag, state.value)
             is NotesEditorUiEvent.RequestSuggestions -> loadSuggestions(event.text, state.value)
+            is NotesEditorUiEvent.ChangeDescriptionFocus -> changeDescriptionFocus(event.focus, state.value)
         }
     }
 
@@ -49,7 +61,9 @@ class NoteEditorViewModel(
                 changed = oldState.origin,
                 availableTypes = noteTypes.values,
                 noteType = oldState.origin.note.type,
-                status = EditFormState.NEW
+                status = EditFormState.NEW,
+                descriptionFocus = DescriptionFocusState.HIDE,
+                descriptionTextValue = TextFieldValue(oldState.origin.note.description)
             )
         )
     }
@@ -65,7 +79,9 @@ class NoteEditorViewModel(
                     changed = note,
                     noteType = note.note.type,
                     status = state,
-                    availableTypes = noteTypes.values
+                    availableTypes = noteTypes.values,
+                    descriptionFocus = DescriptionFocusState.HIDE,
+                    descriptionTextValue = TextFieldValue(note.note.description)
                 )
             )
         }
@@ -105,8 +121,7 @@ class NoteEditorViewModel(
             }
 
             is NotesEditorUiEvent.ChangeEvent.ChangeDescription -> {
-                if (oldState.changed.note.description == changeEvent.text) return
-                oldState.changed.note.copy(description = changeEvent.text)
+                oldState.changed.note.copy(description = changeEvent.text.text.insertTags(oldState.changed.parents.associateBy { it.caption }))
             }
 
             is NotesEditorUiEvent.ChangeEvent.ChangeType -> {
@@ -125,16 +140,22 @@ class NoteEditorViewModel(
             }
         }
 
-        _state.tryEmit(
-            NoteEditorUiState(
-                origin = oldState.origin,
-                status = EditFormState.CHANGED,
-                changed = NoteWithParents(changedNote, oldState.changed.parents),
-                noteType = oldState.noteType,
-                availableTypes = noteTypes.values,
-                suggestions = emptyList()
+        if (changeEvent is NotesEditorUiEvent.ChangeEvent.ChangeDescription) {
+            handleTextInput(changedNote, oldState, changeEvent.text)
+        } else {
+            _state.tryEmit(
+                NoteEditorUiState(
+                    origin = oldState.origin,
+                    status = EditFormState.CHANGED,
+                    changed = NoteWithParents(changedNote, oldState.changed.parents),
+                    noteType = oldState.noteType,
+                    availableTypes = noteTypes.values,
+                    suggestions = emptyList(),
+                    descriptionFocus = oldState.descriptionFocus,
+                    descriptionTextValue = oldState.descriptionTextValue
+                    )
             )
-        )
+        }
     }
 
     private fun addTag(tag: DictionaryElement, oldState: NoteEditorUiState) {
@@ -168,6 +189,75 @@ class NoteEditorViewModel(
                     suggestions = newSuggestions
                 )
             )
+        }
+    }
+
+    private fun changeDescriptionFocus(newValue: DescriptionFocusState, oldState: NoteEditorUiState) {
+        if (newValue == oldState.descriptionFocus) return
+        Log.i("NoteEditorViewModel", "New description focus value: $newValue")
+
+        when (newValue) {
+            DescriptionFocusState.HIDE -> if (oldState.descriptionFocus == DescriptionFocusState.FOCUSED) {
+                _state.tryEmit(
+                    oldState.copy(
+                        descriptionFocus = DescriptionFocusState.HIDE,
+                    )
+                )
+            }
+
+            DescriptionFocusState.SHOW -> if (oldState.descriptionFocus == DescriptionFocusState.HIDE) {
+                _state.tryEmit(oldState.copy(
+                    descriptionFocus = DescriptionFocusState.SHOW,
+                    descriptionTextValue = formatDescriptionForEdit(oldState.changed)
+                ))
+            }
+
+            DescriptionFocusState.FOCUSED -> if (oldState.descriptionFocus == DescriptionFocusState.SHOW) {
+                _state.tryEmit(oldState.copy(
+                    descriptionFocus = DescriptionFocusState.FOCUSED,
+                ))
+            }
+
+        }
+    }
+
+    private fun formatDescriptionForEdit(note: NoteWithParents): TextFieldValue {
+        val insertionMap = note.parents.associateBy { it.id }
+        return TextFieldValue(note.note.description.insertCaptions(insertionMap))
+    }
+
+    private fun handleTextInput(changedNote: Note, oldState: NoteEditorUiState, textInput: TextFieldValue) {
+        val tagAnalyze = textInput.analyzeTags(tagSymbols, oldState.descriptionTextValue.text)
+        _state.tryEmit(oldState.copy(
+            changed = NoteWithParents(changedNote, oldState.changed.parents),
+            descriptionTextValue = tagAnalyze.third,
+            status = EditFormState.CHANGED
+        ))
+        if (tagAnalyze.second.last - tagAnalyze.second.first > 2) {
+            viewModelScope.launch {
+                val tagText = textInput.text.substring(tagAnalyze.second)
+                Log.i("NoteEditorViewModel", "Search suggestions for tag text $tagText")
+                val tagSymbol = tagText.first()
+                val excludedTypes = if (tagSymbol == '#') emptyList() else noteTypes.values.filter { it.symbol.first() != tagSymbol}.map { it.id }
+                val hierarchical = oldState.changed.parents.filter { it.type.hierarchical }.map { it.type.id }.toSet()
+                val suggestions = services.tagSearchService.searchTagSuggestions(
+                    words = getWordsForSearch(tagText.substring(1)),
+                    excludedTypes = excludedTypes + hierarchical,
+                    excludedTags = emptySet()
+                )
+                _state.emit(_state.value.copy(suggestions = suggestions))
+            }
+        } else if (tagAnalyze.first.length > 4) {
+            viewModelScope.launch {
+                val tagText = tagAnalyze.first
+                Log.i("NoteEditorViewModel", "Search suggestions for simple text $tagText")
+                val suggestions = services.tagSearchService.searchTagSuggestions(
+                    words = getWordsForSearch(tagText.substring(1)),
+                    excludedTypes = emptyList(),
+                    excludedTags = oldState.changed.parents.map { it.id }.toSet()
+                )
+                _state.emit(_state.value.copy(suggestions = suggestions))
+            }
         }
     }
 }

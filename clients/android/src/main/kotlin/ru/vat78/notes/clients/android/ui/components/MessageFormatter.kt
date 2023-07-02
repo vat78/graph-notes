@@ -69,7 +69,7 @@ typealias SymbolAnnotation = Pair<AnnotatedString, StringAnnotation?>
 @Composable
 fun messageFormatter(
     text: String,
-    tags: Map<String, DictionaryElement>
+    tags: Map<String, DictionaryElement>,
 ): AnnotatedString {
     val tokens = symbolPattern.findAll(text)
 

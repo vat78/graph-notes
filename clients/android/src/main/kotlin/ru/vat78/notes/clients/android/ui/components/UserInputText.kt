@@ -67,7 +67,7 @@ fun UserInputText(
                 var lastFocusState by remember { mutableStateOf(false) }
                 BasicTextField(
                     value = textFieldValue,
-                    onValueChange = { onTextChanged(it) },
+                    onValueChange = { onTextChanged.invoke(it) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp)
