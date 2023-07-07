@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Note
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -23,6 +26,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.ui.NoteListScreen
+import ru.vat78.notes.clients.android.ui.TagNotesScreen
+import ru.vat78.notes.clients.android.ui.components.NavigationIcon
 import ru.vat78.notes.clients.android.ui.screens.tags.views.TagListView
 import ru.vat78.notes.clients.android.ui.screens.tags.views.TagTopBar
 
@@ -44,11 +50,22 @@ fun Tags(
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
+    val tagTabs = listOf(
+        NavigationIcon(Icons.Filled.List, "",  {}),
+        NavigationIcon(
+            icon = Icons.Filled.Note,
+            description = "",
+            action = { if (rootId == null) appState.navigate(NoteListScreen.route)
+                          else appState.navigate("${TagNotesScreen.route}/$rootId") }
+        )
+    )
+
     Scaffold (
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TagTopBar(
                 caption = uiState.caption ,
+                tabs = tagTabs,
                 scrollBehavior = scrollBehavior,
                 onNavIconPressed = onNavIconPressed,
                 onCaptionPressed = {uiState.rootNote?.let(onCaptionClick)}
