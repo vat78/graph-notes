@@ -17,6 +17,12 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import ru.vat78.notes.clients.android.R
 
+data class NavigationIcon(
+    val icon: ImageVector,
+    val description: String,
+    val action: () -> Unit
+)
+
 @Composable
 fun SearchIcon(
     onClick: () -> Unit = {}
