@@ -14,6 +14,7 @@ import ru.vat78.notes.clients.android.data.NoteWithParents
 import ru.vat78.notes.clients.android.data.getWordsForSearch
 import ru.vat78.notes.clients.android.ui.ext.analyzeTags
 import ru.vat78.notes.clients.android.ui.ext.insertCaptions
+import ru.vat78.notes.clients.android.ui.ext.insertSuggestedTag
 import ru.vat78.notes.clients.android.ui.ext.insertTags
 
 class NoteEditorViewModel(
@@ -160,13 +161,27 @@ class NoteEditorViewModel(
 
     private fun addTag(tag: DictionaryElement, oldState: NoteEditorUiState) {
         val newTags = oldState.changed.parents + tag
-        _state.tryEmit(
-            oldState.copy(
-                status = EditFormState.CHANGED,
-                changed = NoteWithParents(oldState.changed.note, newTags),
-                suggestions = emptyList()
+        if (oldState.descriptionFocus == DescriptionFocusState.FOCUSED) {
+            val text = oldState.descriptionTextValue.insertSuggestedTag(tag, tagSymbols)
+            val note = oldState.changed.note.copy(textInsertions = newTags.associateBy{ it.id})
+            _state.tryEmit(
+                oldState.copy(
+                    status = EditFormState.CHANGED,
+                    changed = NoteWithParents(note, newTags),
+                    descriptionTextValue = text,
+                    suggestions = emptyList()
+                )
             )
-        )
+            sendEvent(NotesEditorUiEvent.ChangeEvent.ChangeDescription(text))
+        } else {
+            _state.tryEmit(
+                oldState.copy(
+                    status = EditFormState.CHANGED,
+                    changed = NoteWithParents(oldState.changed.note, newTags),
+                    suggestions = emptyList()
+                )
+            )
+        }
     }
 
     private fun removeTag(tag: DictionaryElement, oldState: NoteEditorUiState) {

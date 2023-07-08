@@ -2,6 +2,8 @@ package ru.vat78.notes.clients.android.ui.screens.editor
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -14,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -21,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.R
 import ru.vat78.notes.clients.android.ui.TagNotesScreen
+import ru.vat78.notes.clients.android.ui.components.SuggestionList
 import ru.vat78.notes.clients.android.ui.screens.editor.views.NoteEditForm
 
 @ExperimentalMaterial3Api
@@ -77,11 +81,19 @@ fun NoteEditor(
                 }
             )
         }
-        NoteEditForm(
-            uiState = uiState,
-            sendEvent = viewModel::sendEvent,
-            modifier = Modifier.padding(it),
-            onTagClick = {id -> appState.navigate("${TagNotesScreen.route}/$id")}
-        )
+        Box(Modifier.fillMaxSize()) {
+            NoteEditForm(
+                uiState = uiState,
+                sendEvent = viewModel::sendEvent,
+                modifier = Modifier.padding(it),
+                onTagClick = {id -> appState.navigate("${TagNotesScreen.route}/$id")}
+            )
+            SuggestionList(
+                suggestions = uiState.suggestions,
+                modifier = Modifier.align(Alignment.BottomCenter),
+                onSelectSuggestion = { viewModel.sendEvent(NotesEditorUiEvent.AddTag(it)) }
+            )
+        }
+
     }
 }
