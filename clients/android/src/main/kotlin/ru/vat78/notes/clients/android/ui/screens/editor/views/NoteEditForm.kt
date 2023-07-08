@@ -132,6 +132,9 @@ fun NoteEditForm(
             Column(modifier = Modifier.fillMaxWidth()) {
                 TagArea(
                     tags = uiState.changed.parents,
+                    onClickTag = {
+                        onTagClick.invoke(it.id)
+                    },
                     onDeleteTag = {
                         sendEvent.invoke(NotesEditorUiEvent.RemoveTag(it))
                     },
