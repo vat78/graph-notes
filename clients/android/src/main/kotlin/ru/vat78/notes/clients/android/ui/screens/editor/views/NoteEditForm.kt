@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
@@ -55,19 +56,23 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.vat78.notes.clients.android.R
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.NoteWithParents
 import ru.vat78.notes.clients.android.data.TmpIcons
+import ru.vat78.notes.clients.android.data.defaultTypes
 import ru.vat78.notes.clients.android.ui.components.SymbolAnnotationType
 import ru.vat78.notes.clients.android.ui.components.TagArea
-import ru.vat78.notes.clients.android.ui.components.TextFieldWithAutocomplete
+import ru.vat78.notes.clients.android.ui.components.TextFieldForAutocomplete
 import ru.vat78.notes.clients.android.ui.components.messageFormatter
 import ru.vat78.notes.clients.android.ui.screens.editor.DescriptionFocusState
+import ru.vat78.notes.clients.android.ui.screens.editor.EditFormState
 import ru.vat78.notes.clients.android.ui.screens.editor.NoteEditorUiState
 import ru.vat78.notes.clients.android.ui.screens.editor.NotesEditorUiEvent
+import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -125,30 +130,25 @@ fun NoteEditForm(
 
 
             Column(modifier = Modifier.fillMaxWidth()) {
-                val multiTags = !noteType.hierarchical
-                if (multiTags) {
-                    TagArea(
-                        tags = uiState.changed.parents,
-                        onDeleteTag = {
-                            sendEvent.invoke(NotesEditorUiEvent.RemoveTag(it))
-                        },
-                        modifier = modifier.fillMaxWidth()
-                    )
-                }
+                TagArea(
+                    tags = uiState.changed.parents,
+                    onDeleteTag = {
+                        sendEvent.invoke(NotesEditorUiEvent.RemoveTag(it))
+                    },
+                    modifier = modifier.fillMaxWidth()
+                )
 
                 val text = remember { mutableStateOf("") }
-                TextFieldWithAutocomplete(
-                    textSource = text::value,
+                val textFieldSize = remember { mutableStateOf(Size.Zero)}
+                TextFieldForAutocomplete (
+                    text = text.value,
                     hint = stringResource(R.string.tags_input_hint),
-                    tipsProvider = uiState::suggestions,
-                    tipsOnTop = multiTags,
                     onQuery =  {
                         sendEvent.invoke(NotesEditorUiEvent.RequestSuggestions(it))
                         text.value = it
                     },
-                    onValueSet = {
-                        sendEvent.invoke(NotesEditorUiEvent.AddTag(it))
-                    },
+                    correctValue = null,
+                    textFieldSize = textFieldSize
                 )
             }
 
@@ -275,7 +275,6 @@ fun DescriptionEditor(
             val styledMessage = messageFormatter(note.note.description, note.note.textInsertions)
             ClickableText(
                 text = styledMessage,
-                maxLines = 4,
                 style = MaterialTheme.typography.bodyMedium.copy(color = LocalContentColor.current),
                 modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
                 onClick = {
@@ -390,5 +389,30 @@ fun TimeEditors(
                 }
             }
         }
+    }
+}
+
+@Composable
+@Preview
+fun NoteEditFormPreview() {
+    val note = Note(
+        type = defaultTypes.find { !it.tag }!!,
+        caption = "Should not be visible",
+        description = "Some test text. Some test text. Some test text. Some test text. "
+    )
+
+    GraphNotesTheme {
+        NoteEditForm(
+            uiState = NoteEditorUiState(
+                origin = NoteWithParents(note, emptySet()),
+                changed = NoteWithParents(note, emptySet()),
+                noteType = note.type,
+                availableTypes = defaultTypes,
+                status = EditFormState.NEW,
+                descriptionFocus = DescriptionFocusState.SHOW,
+                descriptionTextValue = TextFieldValue(note.description)
+            ),
+            sendEvent = {}
+        )
     }
 }
