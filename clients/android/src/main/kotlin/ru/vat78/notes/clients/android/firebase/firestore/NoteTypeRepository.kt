@@ -3,6 +3,7 @@
 package ru.vat78.notes.clients.android.firebase.firestore
 
 import android.util.Log
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.snapshots
@@ -11,9 +12,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.NoteTypeStorage
+import ru.vat78.notes.clients.android.data.TimeDefault
 import ru.vat78.notes.clients.android.data.User
 import ru.vat78.notes.clients.android.data.defaultTypes
 
@@ -32,9 +36,9 @@ class NoteTypeRepository (
             val data: List<NoteType> = firestore.collection(USER_COLLECTION)
                 .document(user.id)
                 .collection(NOTE_TYPES_COLLECTION)
-                .snapshots()
-                .mapLatest<QuerySnapshot, List<NoteType>> { snapshot -> snapshot.toObjects() }
-                .first()
+                .get()
+                .await()
+                .map {doc -> doc.toNoteType()}
             if (data.isEmpty()) {
                 saveToCache(storeDefaultTypes())
             } else {
@@ -62,4 +66,18 @@ class NoteTypeRepository (
     private fun saveToCache(types: List<NoteType>) {
         _cache = types.associateBy { it.id }
     }
+}
+
+private fun DocumentSnapshot.toNoteType() : NoteType {
+    return NoteType(
+        id = data?.get("id") as String,
+        name = data?.get("name") as String,
+        icon = data?.get("icon") as String,
+        tag = data?.get("tag") as Boolean,
+        hierarchical = data?.get("hierarchical") as Boolean,
+        symbol = (data?.get("symbol") as String).first(),
+        defaultStart = TimeDefault.valueOf(data?.get("defaultStart") as String),
+        defaultFinish = TimeDefault.valueOf(data?.get("defaultFinish") as String),
+        default = data?.get("default") as Boolean,
+    )
 }
