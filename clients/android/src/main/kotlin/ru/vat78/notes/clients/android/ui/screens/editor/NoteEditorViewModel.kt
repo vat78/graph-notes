@@ -39,7 +39,7 @@ class NoteEditorViewModel(
         get() = services.noteTypeStorage.types
 
     private val tagSymbols
-        get() = noteTypes.values.filter { it.symbol.isNotEmpty() }.map { it.symbol.first() }
+        get() = noteTypes.values.map { it.symbol }.toSet()
 
     override fun sendEvent(event: NotesEditorUiEvent) {
         when (event) {
@@ -280,7 +280,7 @@ class NoteEditorViewModel(
                 val tagText = textInput.text.substring(tagAnalyze.second)
                 Log.i("NoteEditorViewModel", "Search suggestions for tag text $tagText")
                 val tagSymbol = tagText.first()
-                val excludedTypes = if (tagSymbol == '#') emptyList() else noteTypes.values.filter { it.symbol.first() != tagSymbol}.map { it.id }
+                val excludedTypes = if (tagSymbol == '#') emptyList() else noteTypes.values.filter { it.symbol != tagSymbol}.map { it.id }
                 val hierarchical = oldState.changed.parents.filter { it.type.hierarchical }.map { it.type.id }.toSet()
                 val suggestions = services.tagSearchService.searchTagSuggestions(
                     words = getWordsForSearch(tagText.substring(1)),
@@ -289,17 +289,20 @@ class NoteEditorViewModel(
                 )
                 _state.emit(_state.value.copy(suggestions = suggestions))
             }
-        } else if (tagAnalyze.first.length > 4) {
-            viewModelScope.launch {
-                val tagText = tagAnalyze.first
-                Log.i("NoteEditorViewModel", "Search suggestions for simple text $tagText")
-                val suggestions = services.tagSearchService.searchTagSuggestions(
-                    words = getWordsForSearch(tagText.substring(1)),
-                    excludedTypes = emptyList(),
-                    excludedTags = oldState.changed.parents.map { it.id }.toSet()
-                )
-                _state.emit(_state.value.copy(suggestions = suggestions))
-            }
+        } else {
+            _state.tryEmit(_state.value.copy(suggestions = emptyList()))
         }
+//        } else if (tagAnalyze.first.length > 4) {
+//            viewModelScope.launch {
+//                val tagText = tagAnalyze.first
+//                Log.i("NoteEditorViewModel", "Search suggestions for simple text $tagText")
+//                val suggestions = services.tagSearchService.searchTagSuggestions(
+//                    words = getWordsForSearch(tagText.substring(1)),
+//                    excludedTypes = emptyList(),
+//                    excludedTags = oldState.changed.parents.map { it.id }.toSet()
+//                )
+//                _state.emit(_state.value.copy(suggestions = suggestions))
+//            }
+//        }
     }
 }

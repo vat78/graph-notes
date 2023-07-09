@@ -32,7 +32,7 @@ class TimeLineViewModel(
         get() = services.noteTypeStorage.types
 
     private val tagSymbols
-        get() = noteTypes.values.filter { it.symbol.isNotEmpty() }.map { it.symbol.first() }
+        get() = noteTypes.values.map { it.symbol }.toSet()
 
     override fun sendEvent(event: TimeLineEvent) {
         when (event) {
@@ -59,10 +59,16 @@ class TimeLineViewModel(
         if (tagAnalyze.second.last - tagAnalyze.second.first > 2) {
             viewModelScope.launch {
                 val tagText = textInput.text.substring(tagAnalyze.second)
-                Log.i("TimeLineViewModel", "Search suggestions for tag text $tagText")
                 val tagSymbol = tagText.first()
-                val excludedTypes = if (tagSymbol == '#') emptyList() else noteTypes.values.filter { it.symbol.first() != tagSymbol}.map { it.id }
-                val hierarchical = oldState.selectedSuggestions.filter { it.type.hierarchical }.map { it.type.id }.toSet()
+                val excludedTypes =
+                    if (tagSymbol == '#') emptyList() else noteTypes.values.filter { it.symbol != tagSymbol }
+                        .map { it.id }
+                val hierarchical =
+                    oldState.selectedSuggestions.filter { it.type.hierarchical }.map { it.type.id }.toSet()
+                Log.i(
+                    "TimeLineViewModel",
+                    "Search suggestions for tag text $tagText with excluded $excludedTypes by tag $tagSymbol"
+                )
                 val suggestions = services.tagSearchService.searchTagSuggestions(
                     words = getWordsForSearch(tagText.substring(1)),
                     excludedTypes = excludedTypes + hierarchical,
@@ -70,18 +76,21 @@ class TimeLineViewModel(
                 )
                 _state.emit(_state.value.copy(suggestions = suggestions))
             }
-        } else if (tagAnalyze.first.length > 4) {
-            viewModelScope.launch {
-                val tagText = tagAnalyze.first
-                Log.i("TimeLineViewModel", "Search suggestions for simple text $tagText")
-                val suggestions = services.tagSearchService.searchTagSuggestions(
-                    words = getWordsForSearch(tagText.substring(1)),
-                    excludedTypes = emptyList(),
-                    excludedTags = oldState.selectedSuggestions.map { it.id }.toSet()
-                )
-                _state.emit(_state.value.copy(suggestions = suggestions))
-            }
+        } else {
+            _state.tryEmit(_state.value.copy(suggestions = emptyList()))
         }
+//        } else if (tagAnalyze.first.length > 4) {
+//            viewModelScope.launch {
+//                val tagText = tagAnalyze.first
+//                Log.i("TimeLineViewModel", "Search suggestions for simple text $tagText")
+//                val suggestions = services.tagSearchService.searchTagSuggestions(
+//                    words = getWordsForSearch(tagText.substring(1)),
+//                    excludedTypes = emptyList(),
+//                    excludedTags = oldState.selectedSuggestions.map { it.id }.toSet()
+//                )
+//                _state.emit(_state.value.copy(suggestions = suggestions))
+//            }
+//        }
     }
 
     private fun loadNotes(oldState: TimeLineState) {

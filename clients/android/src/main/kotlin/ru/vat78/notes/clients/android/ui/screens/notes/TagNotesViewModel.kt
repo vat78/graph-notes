@@ -35,7 +35,7 @@ class TagNotesViewModel(
         get() = services.noteTypeStorage.types
 
     private val tagSymbols
-        get() = noteTypes.values.filter { it.symbol.isNotEmpty() }.map { it.symbol.first() }
+        get() = noteTypes.values.map { it.symbol }.toSet()
 
     override fun sendEvent(event: TagNotesUiEvent) {
         when (event) {
@@ -103,7 +103,7 @@ class TagNotesViewModel(
                 val tagText = textInput.text.substring(tagAnalyze.second)
                 Log.i("TagNotesUiState", "Search suggestions for tag text $tagText")
                 val tagSymbol = tagText.first()
-                val excludedTypes = if (tagSymbol == '#') emptyList() else noteTypes.values.filter { it.symbol.first() != tagSymbol}.map { it.id }
+                val excludedTypes = if (tagSymbol == '#') emptyList() else noteTypes.values.filter { it.symbol != tagSymbol}.map { it.id }
                 val hierarchical = oldState.selectedSuggestions.filter { it.type.hierarchical }.map { it.type.id }.toSet()
                 val suggestions = services.tagSearchService.searchTagSuggestions(
                     words = getWordsForSearch(tagText.substring(1)),
@@ -112,18 +112,21 @@ class TagNotesViewModel(
                 )
                 _state.emit(_state.value.copy(suggestions = suggestions))
             }
-        } else if (tagAnalyze.first.length > 4) {
-            viewModelScope.launch {
-                val tagText = tagAnalyze.first
-                Log.i("TagNotesUiState", "Search suggestions for simple text $tagText")
-                val suggestions = services.tagSearchService.searchTagSuggestions(
-                    words = getWordsForSearch(tagText.substring(1)),
-                    excludedTypes = emptyList(),
-                    excludedTags = oldState.selectedSuggestions.map { it.id }.toSet()
-                )
-                _state.emit(_state.value.copy(suggestions = suggestions))
-            }
+        } else {
+            _state.tryEmit(_state.value.copy(suggestions = emptyList()))
         }
+//        } else if (tagAnalyze.first.length > 4) {
+//            viewModelScope.launch {
+//                val tagText = tagAnalyze.first
+//                Log.i("TagNotesUiState", "Search suggestions for simple text $tagText")
+//                val suggestions = services.tagSearchService.searchTagSuggestions(
+//                    words = getWordsForSearch(tagText.substring(1)),
+//                    excludedTypes = emptyList(),
+//                    excludedTags = oldState.selectedSuggestions.map { it.id }.toSet()
+//                )
+//                _state.emit(_state.value.copy(suggestions = suggestions))
+//            }
+//        }
     }
 
     private suspend fun getChildNotesWithHierarchy(root: NoteWithChildren): Collection<Note> {

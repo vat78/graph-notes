@@ -27,7 +27,7 @@ val defaultTypes = listOf(
         icon = "Note",
         tag = false,
         hierarchical = false,
-        symbol = "",
+        symbol = '#',
         defaultStart = TimeDefault.PREVIOUS_NOTE,
         defaultFinish = TimeDefault.NOW,
         default = true
@@ -37,7 +37,7 @@ val defaultTypes = listOf(
         icon = "Check",
         tag = true,
         hierarchical = true,
-        symbol = "&",
+        symbol = '&',
         defaultStart = TimeDefault.NOW,
         defaultFinish = TimeDefault.NEXT_MONTH
     ),
@@ -46,7 +46,7 @@ val defaultTypes = listOf(
         icon = "Tag",
         tag = true,
         hierarchical = false,
-        symbol = "#",
+        symbol = '#',
         defaultStart = TimeDefault.START_OF_TIME,
         defaultFinish = TimeDefault.END_OF_TIME
     ),
@@ -55,7 +55,7 @@ val defaultTypes = listOf(
         icon = "People",
         tag = true,
         hierarchical = false,
-        symbol = "@",
+        symbol = '@',
         defaultStart = TimeDefault.START_OF_TIME,
         defaultFinish = TimeDefault.END_OF_TIME
     ),
@@ -64,7 +64,7 @@ val defaultTypes = listOf(
         icon = "House",
         tag = true,
         hierarchical = false,
-        symbol = "#",
+        symbol = '#',
         defaultStart = TimeDefault.START_OF_TIME,
         defaultFinish = TimeDefault.END_OF_TIME
     ),
@@ -73,7 +73,7 @@ val defaultTypes = listOf(
         icon = "Phone",
         tag = true,
         hierarchical = false,
-        symbol = "+",
+        symbol = '+',
         defaultStart = TimeDefault.START_OF_TIME,
         defaultFinish = TimeDefault.END_OF_TIME
     ),

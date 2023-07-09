@@ -9,7 +9,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import ru.vat78.notes.clients.android.data.DictionaryElement
 
-fun TextFieldValue.analyzeTags(tagMarkers: List<Char>, previousValue: String): Triple<String, IntRange, TextFieldValue> {
+fun TextFieldValue.analyzeTags(tagMarkers: Iterable<Char>, previousValue: String): Triple<String, IntRange, TextFieldValue> {
     Log.i("TextFieldValue", "Analyze text $text with selection $selection against old $previousValue")
     if (selection.start != selection.end) {
         Log.i("TextFieldValue", "There is a text selected")
@@ -54,7 +54,7 @@ fun TextFieldValue.analyzeTags(tagMarkers: List<Char>, previousValue: String): T
     return Triple(textBeforeCursor, tagSuggestion, this)
 }
 
-fun TextFieldValue.curTagPosition(tagMarkers: List<Char>): Int {
+fun TextFieldValue.curTagPosition(tagMarkers: Iterable<Char>): Int {
     if (selection.start != selection.end) {
         Log.i("TextFieldValue", "There is a text selected")
         return -1
@@ -81,7 +81,7 @@ fun TextFieldValue.curTagPosition(tagMarkers: List<Char>): Int {
     return tagStart
 }
 
-fun TextFieldValue.insertSuggestedTag(tag: DictionaryElement, tagMarkers: List<Char>): TextFieldValue {
+fun TextFieldValue.insertSuggestedTag(tag: DictionaryElement, tagMarkers: Iterable<Char>): TextFieldValue {
     val tagStartPosition = curTagPosition(tagMarkers)
     if (tagStartPosition < 0) {
         Log.w("TextFieldValue", "Selected tag, but it was not found in text")

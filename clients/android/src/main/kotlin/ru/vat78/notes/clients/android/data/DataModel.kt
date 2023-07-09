@@ -53,7 +53,7 @@ data class NoteType(
     val icon: String = "Note",
     val tag: Boolean = true,
     val hierarchical: Boolean = false,
-    val symbol: String = "",
+    val symbol: Char = '#',
     val defaultStart: TimeDefault = TimeDefault.NOW,
     val defaultFinish: TimeDefault = TimeDefault.NOW,
     val id: String = UUID.randomUUID().toString(),

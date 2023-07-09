@@ -20,6 +20,7 @@ import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.NoteTypeStorage
 import ru.vat78.notes.clients.android.data.TagSearchService
 import ru.vat78.notes.clients.android.data.User
+import ru.vat78.notes.clients.android.ui.ext.pmap
 
 class TagSearchRepository(
     private val user: User,
@@ -37,7 +38,7 @@ class TagSearchRepository(
     ): List<DictionaryElement> {
         val result = withContext(Dispatchers.IO) {
             val ids = words.asIterable()
-                .map { findIdsByWord(word = it, excluded = excludedTypes) }
+                .pmap { findIdsByWord(word = it, excluded = excludedTypes) }
                 .map { it.first() }
                 .fold(emptySet<String>()){ acc, list ->
                     if (acc.isEmpty() || list.isEmpty()) acc + list else acc.intersect(list)
