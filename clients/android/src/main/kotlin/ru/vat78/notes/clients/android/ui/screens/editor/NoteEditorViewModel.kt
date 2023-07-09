@@ -16,6 +16,7 @@ import ru.vat78.notes.clients.android.ui.ext.analyzeTags
 import ru.vat78.notes.clients.android.ui.ext.insertCaptions
 import ru.vat78.notes.clients.android.ui.ext.insertSuggestedTag
 import ru.vat78.notes.clients.android.ui.ext.insertTags
+import ru.vat78.notes.clients.android.ui.ext.pmap
 
 class NoteEditorViewModel(
     private val appState: AppState,
@@ -49,6 +50,7 @@ class NoteEditorViewModel(
             is NotesEditorUiEvent.ChangeEvent -> changeNote(event, state.value)
             is NotesEditorUiEvent.AlignStartTime -> {}
             is NotesEditorUiEvent.AddTag -> addTag(event.newTag, state.value)
+            is NotesEditorUiEvent.AddChildTags -> loadAndAddTags(event.mainTags, state.value)
             is NotesEditorUiEvent.RemoveTag -> removeTag(event.tag, state.value)
             is NotesEditorUiEvent.RequestSuggestions -> loadSuggestions(event.text, state.value)
             is NotesEditorUiEvent.ChangeDescriptionFocus -> changeDescriptionFocus(event.focus, state.value)
@@ -85,6 +87,9 @@ class NoteEditorViewModel(
                     descriptionTextValue = TextFieldValue(note.note.description)
                 )
             )
+            if (uuid == "new") {
+                sendEvent(NotesEditorUiEvent.AddChildTags(note.parents))
+            }
         }
     }
 
@@ -182,6 +187,7 @@ class NoteEditorViewModel(
                 )
             )
         }
+        sendEvent(NotesEditorUiEvent.AddChildTags(listOf(tag)))
     }
 
     private fun removeTag(tag: DictionaryElement, oldState: NoteEditorUiState) {
@@ -233,6 +239,27 @@ class NoteEditorViewModel(
                 ))
             }
 
+        }
+    }
+
+
+    private fun loadAndAddTags(mainTags: Iterable<DictionaryElement>, oldState: NoteEditorUiState) {
+        viewModelScope.launch {
+            val additionalTags = mainTags
+                .pmap { services.noteStorage.getNoteWithParents(it.id)}
+                .asSequence()
+                .map {
+                    val noteType = it.note.type
+                    if (noteType.hierarchical)
+                        it.parents.filter { it.type.id != noteType.id }.toSet()
+                    else it.parents
+                }
+                .flatMap { it.asSequence() }
+                .toSet()
+            val newTags = oldState.changed.parents + additionalTags
+            _state.emit(oldState.copy(
+                changed = oldState.changed.copy(parents = newTags)
+            ))
         }
     }
 

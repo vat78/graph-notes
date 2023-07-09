@@ -79,6 +79,10 @@ sealed class NotesEditorUiEvent: UiEvent {
         val newTag: DictionaryElement,
     ): NotesEditorUiEvent()
 
+    data class AddChildTags(
+        val mainTags: Iterable<DictionaryElement>,
+    ): NotesEditorUiEvent()
+
     data class RemoveTag(
         val tag: DictionaryElement
     ): NotesEditorUiEvent()
