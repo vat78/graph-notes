@@ -20,6 +20,7 @@ import ru.vat78.notes.clients.android.data.NoteWithParents
 import ru.vat78.notes.clients.android.data.NotesFilter
 import ru.vat78.notes.clients.android.data.User
 import ru.vat78.notes.clients.android.data.generateTime
+import ru.vat78.notes.clients.android.ui.ext.pmap
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -39,6 +40,13 @@ class NoteRepository (
         Log.i("NoteRepository", "Request for notes with filter $filter")
         if (filter.noteIdsForLoad?.isEmpty() == true) {
             return emptyList()
+        } else if ((filter.noteIdsForLoad?.size ?: 0) > 30) {
+            val ids = filter.noteIdsForLoad!!
+            return ids.chunked(30)
+                .pmap{ getNotes(filter.copy(noteIdsForLoad = it))}
+                .asSequence()
+                .flatMap { it.asSequence() }
+                .toList()
         }
         val result = withContext(Dispatchers.IO) {
             var query: Query = firestore.collection(USER_COLLECTION)
