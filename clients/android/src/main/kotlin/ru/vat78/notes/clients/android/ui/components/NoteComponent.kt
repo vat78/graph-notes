@@ -90,7 +90,7 @@ fun NoteComponent(
                 if (note.description.isNotBlank()) {
                     ClickableText(
                         text = styledMessage,
-                        maxLines = 4,
+                        maxLines = 14,
                         style = MaterialTheme.typography.bodyMedium.copy(color = LocalContentColor.current),
                         modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
                         onClick = {
