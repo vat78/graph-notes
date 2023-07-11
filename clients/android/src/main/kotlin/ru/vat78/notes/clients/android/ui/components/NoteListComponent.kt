@@ -46,7 +46,7 @@ fun NoteListComponent(
     val scope = rememberCoroutineScope()
     Box(modifier = modifier) {
         LazyColumn(
-            reverseLayout = false,
+            reverseLayout = true,
             state = scrollState,
             contentPadding =
                 WindowInsets.statusBars.add(WindowInsets(top = 90.dp)).asPaddingValues(),
@@ -54,13 +54,15 @@ fun NoteListComponent(
                 .fillMaxSize()
         ){
             for (index in notes.indices) {
-                val prevDate = notes.getOrNull(index - 1)?.finish?.toLocalDate()
                 val content = notes[index]
                 val curDate = content.finish.toLocalDate()
 
-                if (curDate != prevDate) {
-                    item {
-                        DayHeader(curDate)
+                if (index > 0) {
+                    val prevDate = notes[index - 1].finish.toLocalDate()
+                    if (curDate != prevDate) {
+                        item {
+                            DayHeader(prevDate)
+                        }
                     }
                 }
 

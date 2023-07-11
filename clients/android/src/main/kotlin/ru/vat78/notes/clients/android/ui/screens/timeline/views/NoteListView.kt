@@ -44,7 +44,7 @@ fun NoteListView(
             onEventInput = onCreateNote,
             resetScroll = {
                 scope.launch {
-                    scrollState.scrollToItem(0)
+                    scrollState.scrollToItem(notes.size)
                 }
             },
             modifier = Modifier

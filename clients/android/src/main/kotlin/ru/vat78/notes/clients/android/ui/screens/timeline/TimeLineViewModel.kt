@@ -106,7 +106,7 @@ class TimeLineViewModel(
         viewModelScope.launch {
             val notes = services.noteStorage.getNotes(NotesFilter (
                 typesToLoad = noteTypes.values.filter { !it.tag }.map { it.id }
-            ))
+            )).sortedByDescending { it.finish }
             _state.emit(
                 TimeLineState(
                     caption = oldState.caption,
