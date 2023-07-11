@@ -50,7 +50,7 @@ class TagsViewModel(
                     typesToLoad = listOf(mainType.id),
                     onlyRoots = mainType.hierarchical
                 )
-            )
+            ).sortedBy { it.caption }
             _state.emit(
                 TagsUiState(
                     tagType = mainType,

@@ -52,7 +52,7 @@ class TagNotesViewModel(
 
         viewModelScope.launch {
             val note = services.noteStorage.getNoteWithChildren(tagId)
-            val values = getChildNotesWithHierarchy(note).sortedBy { it.finish }
+            val values = getChildNotesWithHierarchy(note).sortedByDescending { it.finish }
             _state.emit(
                 TagNotesUiState(
                     notes = values,

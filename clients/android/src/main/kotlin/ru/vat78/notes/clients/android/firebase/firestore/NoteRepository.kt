@@ -69,6 +69,7 @@ class NoteRepository (
                 query = query.whereEqualTo("root", true)
             }
             return@withContext query
+                .limit(100)
                 .orderBy("finish")
                 .get()
                 .await()
