@@ -8,10 +8,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.vat78.notes.clients.android.data.DictionaryElement
@@ -33,10 +31,9 @@ fun SuggestionList(
         ) {
             LazyColumn(modifier = Modifier.padding(vertical = 4.dp)) {
                 itemsIndexed(suggestions) { index, item ->
-                    Text(
+                    TagRecord(
                         text = suggestions[index].caption,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        iconName = suggestions[index].type.icon,
                         modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
                             .clickable { onSelectSuggestion.invoke(suggestions[index]) }
                     )
