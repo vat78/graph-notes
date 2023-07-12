@@ -1,9 +1,9 @@
 package ru.vat78.notes.clients.android.ui.components
 
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +34,7 @@ fun PermissionDialog(onRequestPermission: () -> Unit) {
                     },
                     modifier = Modifier.textButton(),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Red10,
+                        containerColor = Red10,
                         contentColor = Color.White
                     )
                 ) { Text(text = stringResource(AppText.request_notification_permission)) }
@@ -58,7 +58,7 @@ fun RationaleDialog() {
                     onClick = { showWarningDialog = false },
                     modifier = Modifier.textButton(),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Red10,
+                        containerColor = Red10,
                         contentColor = Color.White
                     )
                 ) { Text(text = stringResource(AppText.ok)) }
