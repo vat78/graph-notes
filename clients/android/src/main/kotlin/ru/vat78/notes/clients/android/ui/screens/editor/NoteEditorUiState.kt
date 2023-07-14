@@ -31,7 +31,8 @@ data class NoteEditorUiState(
     val status: EditFormState,
     val descriptionFocus: DescriptionFocusState,
     val descriptionTextValue: TextFieldValue,
-    val suggestions: List<DictionaryElement> = emptyList()
+    val suggestions: List<DictionaryElement> = emptyList(),
+    val newTag: DictionaryElement? = null
 ) : UiState
 
 sealed class NotesEditorUiEvent: UiEvent {
@@ -93,5 +94,16 @@ sealed class NotesEditorUiEvent: UiEvent {
 
     data class ChangeDescriptionFocus(
         val focus: DescriptionFocusState
+    ): NotesEditorUiEvent()
+
+    data class CreateNewTag(
+        val tag: DictionaryElement
+    ): NotesEditorUiEvent()
+
+    object CancelNewTag: NotesEditorUiEvent()
+
+    data class ChangeNewTagType(
+        val tag: DictionaryElement,
+        val type: NoteType
     ): NotesEditorUiEvent()
 }

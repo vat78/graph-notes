@@ -8,12 +8,17 @@ import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.base.BaseViewModel
 import ru.vat78.notes.clients.android.base.ListState
 import ru.vat78.notes.clients.android.data.DictionaryElement
+import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.NotesFilter
+import ru.vat78.notes.clients.android.data.generateTime
 import ru.vat78.notes.clients.android.data.getWordsForSearch
 import ru.vat78.notes.clients.android.data.uploadTextInsertions
 import ru.vat78.notes.clients.android.ui.ext.analyzeTags
 import ru.vat78.notes.clients.android.ui.ext.insertSuggestedTag
 import ru.vat78.notes.clients.android.ui.ext.insertTags
+import java.time.ZonedDateTime
+import java.util.*
 
 class TimeLineViewModel(
     private val appState: AppState,
@@ -28,7 +33,7 @@ class TimeLineViewModel(
 
     private val services
         get() = appState.context.services
-    private val noteTypes
+    val noteTypes
         get() = services.noteTypeStorage.types
 
     private val tagSymbols
@@ -40,10 +45,40 @@ class TimeLineViewModel(
             is TimeLineEvent.CreateNote -> createNote(event.text, state.value.selectedSuggestions)
             is TimeLineEvent.NewTextInput -> handleTextInput(state.value, event.textInput)
             is TimeLineEvent.SelectSuggestion -> insertSuggestion(state.value, event.tag)
+            is TimeLineEvent.CreateNewTag -> createNewTag(state.value, event.tag)
+            is TimeLineEvent.CancelNewTag -> cancelNewTag(state.value)
+            is TimeLineEvent.ChangeNewTagType -> changeTypeOnNewTag(state.value, event.tag, event.type)
         }
     }
 
+    private fun createNewTag(oldState: TimeLineState, tag: DictionaryElement) {
+        val newTag = Note(
+            id = UUID.randomUUID().toString(),
+            type =  tag.type,
+            caption = tag.caption,
+            start = generateTime(tag.type.defaultStart, { ZonedDateTime.now() }),
+            finish = generateTime(tag.type.defaultFinish, { ZonedDateTime.now() }),
+        )
+        viewModelScope.launch {
+            val savedNote = services.noteStorage.saveNote(newTag, emptySet())
+            insertSuggestion(oldState.copy(newTag = null), DictionaryElement(savedNote))
+        }
+    }
+
+    private fun cancelNewTag(oldState: TimeLineState) {
+        _state.tryEmit(oldState.copy(newTag = null))
+    }
+
+    private fun changeTypeOnNewTag(oldState: TimeLineState, tag: DictionaryElement, newType: NoteType) {
+        val newTag = tag.copy(type = newType)
+        _state.tryEmit(oldState.copy(newTag = newTag))
+    }
+
     private fun insertSuggestion(oldState: TimeLineState, tag: DictionaryElement) {
+        if (tag.id.isBlank()) {
+            _state.tryEmit(oldState.copy(newTag = tag))
+            return
+        }
         val text = oldState.inputValue.insertSuggestedTag(tag, tagSymbols)
         val selections = oldState.selectedSuggestions + tag
         _state.tryEmit(oldState.copy(
@@ -69,11 +104,12 @@ class TimeLineViewModel(
                     "TimeLineViewModel",
                     "Search suggestions for tag text $tagText with excluded $excludedTypes by tag $tagSymbol"
                 )
+                val textForSearch = tagText.substring(1)
                 val suggestions = services.tagSearchService.searchTagSuggestions(
-                    words = getWordsForSearch(tagText.substring(1)),
+                    words = getWordsForSearch(textForSearch),
                     excludedTypes = excludedTypes + hierarchical,
                     excludedTags = emptySet()
-                )
+                ) + newDictionaryElementForSuggestion(tagSymbol, textForSearch)
                 _state.emit(_state.value.copy(suggestions = suggestions))
             }
         } else {
@@ -91,6 +127,15 @@ class TimeLineViewModel(
 //                _state.emit(_state.value.copy(suggestions = suggestions))
 //            }
 //        }
+    }
+
+    private fun newDictionaryElementForSuggestion(tagSymbol: Char, tagText: String) : DictionaryElement {
+        val tagType = noteTypes.values.first { it.symbol == tagSymbol }
+        return DictionaryElement(
+            id = "",
+            type = tagType,
+            caption = tagText
+        )
     }
 
     private fun loadNotes(oldState: TimeLineState) {

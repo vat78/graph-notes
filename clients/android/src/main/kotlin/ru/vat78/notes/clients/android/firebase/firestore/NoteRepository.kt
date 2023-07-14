@@ -136,9 +136,13 @@ class NoteRepository (
         }
     }
 
-    override suspend fun saveNote(note: Note, parents: Set<DictionaryElement>) {
+    override suspend fun saveNote(note: Note, parents: Set<DictionaryElement>): Note {
         Log.i("NoteRepository", "Save note ${note.id} with its parent links")
-        withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
+            if (note.type.tag) {
+                val savedNote = getNoteByCaption(note.caption)
+                if (savedNote != null) return@withContext savedNote
+            }
             val parentsFromDb = getParentIds(note.id).toSet()
             firestore.collection(USER_COLLECTION)
                 .document(user.id)
@@ -161,6 +165,7 @@ class NoteRepository (
                     insertLink(batch, note.id, it)
                 }
             }
+            return@withContext note
         }
     }
 
@@ -209,6 +214,19 @@ class NoteRepository (
             .document(id)
             .get()
             .await()
+            ?.toNote(noteTypes)
+            ?: throw Exception("Note not found")
+    }
+
+    private suspend fun getNoteByCaption(caption: String) : Note? {
+        val result = firestore.collection(USER_COLLECTION)
+            .document(user.id)
+            .collection(NOTES_COLLECTION)
+            .whereEqualTo("caption", caption)
+            .get()
+            .await()
+            .documents
+        return if (result.isEmpty()) null else result[0]
             ?.toNote(noteTypes)
             ?: throw Exception("Note not found")
     }

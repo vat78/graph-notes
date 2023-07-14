@@ -64,6 +64,7 @@ import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.NoteWithParents
 import ru.vat78.notes.clients.android.data.TmpIcons
 import ru.vat78.notes.clients.android.data.defaultTypes
+import ru.vat78.notes.clients.android.ui.components.NewTagAlert
 import ru.vat78.notes.clients.android.ui.components.SymbolAnnotationType
 import ru.vat78.notes.clients.android.ui.components.TagArea
 import ru.vat78.notes.clients.android.ui.components.TextFieldForAutocomplete
@@ -82,12 +83,25 @@ import java.time.temporal.ChronoUnit
 fun NoteEditForm(
     uiState: NoteEditorUiState,
     sendEvent: (NotesEditorUiEvent) -> Unit,
+    tagTypes: Collection<NoteType>,
     modifier: Modifier = Modifier,
     scrollableState: ScrollState = rememberScrollState(),
     onTagClick: (String) -> Unit = { }
 ) {
     val note = uiState.changed.note
     val noteType = uiState.noteType
+
+    if (uiState.newTag != null) {
+        val newTag = uiState.newTag
+        NewTagAlert(
+            tag = newTag,
+            tagTypes = tagTypes,
+            onDismiss = { sendEvent.invoke(NotesEditorUiEvent.CancelNewTag) },
+            onConfirm = { sendEvent.invoke(NotesEditorUiEvent.CreateNewTag(it)) },
+            onChangeType = { sendEvent.invoke(NotesEditorUiEvent.ChangeNewTagType(newTag, it)) }
+        )
+    }
+
     Surface (
         modifier = modifier.fillMaxWidth()
     ) {
@@ -415,7 +429,8 @@ fun NoteEditFormPreview() {
                 descriptionFocus = DescriptionFocusState.SHOW,
                 descriptionTextValue = TextFieldValue(note.description)
             ),
-            sendEvent = {}
+            sendEvent = {},
+            tagTypes = emptyList()
         )
     }
 }

@@ -3,6 +3,7 @@ package ru.vat78.notes.clients.android.data
 fun buildSearchBlocks(text: String): Set<String> {
     val words = getWordsForSearch(text)
     return words.asSequence()
+        .map { it.trim('(', ',', '.', '+', ')', '!', '?', '#') }
         .flatMap { splitWordOnTokens(it) }
         .toSet()
 }

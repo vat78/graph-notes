@@ -10,8 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ru.vat78.notes.clients.android.R
 import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.defaultTypes
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
@@ -31,8 +33,11 @@ fun SuggestionList(
         ) {
             LazyColumn(modifier = Modifier.padding(vertical = 4.dp)) {
                 itemsIndexed(suggestions) { index, item ->
+                    val text = if (suggestions[index].id.isBlank())
+                        stringResource(R.string.new_tag_prefix) + suggestions[index].caption
+                    else suggestions[index].caption
                     TagRecord(
-                        text = suggestions[index].caption,
+                        text = text,
                         iconName = suggestions[index].type.icon,
                         modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
                             .clickable { onSelectSuggestion.invoke(suggestions[index]) }

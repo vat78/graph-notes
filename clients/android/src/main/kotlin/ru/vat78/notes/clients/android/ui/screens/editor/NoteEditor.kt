@@ -85,6 +85,7 @@ fun NoteEditor(
             NoteEditForm(
                 uiState = uiState,
                 sendEvent = viewModel::sendEvent,
+                tagTypes = viewModel.noteTypes.values.filter { it.tag && !it.hierarchical },
                 modifier = Modifier.padding(it),
                 onTagClick = {id -> appState.navigate("${TagNotesScreen.route}/$id")}
             )
