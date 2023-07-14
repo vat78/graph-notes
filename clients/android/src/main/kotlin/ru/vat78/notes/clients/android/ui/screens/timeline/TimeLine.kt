@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.ui.TagNotesScreen
+import ru.vat78.notes.clients.android.ui.components.NewTagAlert
 import ru.vat78.notes.clients.android.ui.screens.timeline.views.NoteListView
 import ru.vat78.notes.clients.android.ui.screens.timeline.views.TimeLineTopBar
 
@@ -42,6 +43,16 @@ fun TimeLineScreen(
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
+    if (uiState.newTag != null) {
+        val newTag = uiState.newTag!!
+        NewTagAlert(
+            tag = newTag,
+            tagTypes = viewModel.noteTypes.values.filter { it.tag && !it.hierarchical },
+            onDismiss = { viewModel.sendEvent(TimeLineEvent.CancelNewTag) },
+            onConfirm = { viewModel.sendEvent(TimeLineEvent.CreateNewTag(it)) },
+            onChangeType = { viewModel.sendEvent(TimeLineEvent.ChangeNewTagType(newTag, it)) }
+        )
+    }
     Scaffold (
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {

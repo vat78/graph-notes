@@ -14,7 +14,8 @@ data class TimeLineState(
     val state: ListState,
     val inputValue: TextFieldValue,
     val selectedSuggestions: Set<DictionaryElement> = emptySet(),
-    val suggestions: List<DictionaryElement> = emptyList()
+    val suggestions: List<DictionaryElement> = emptyList(),
+    val newTag: DictionaryElement? = null
 ) : UiState
 
 sealed class TimeLineEvent() : UiEvent {
@@ -33,5 +34,16 @@ sealed class TimeLineEvent() : UiEvent {
 
     data class SelectSuggestion(
         val tag: DictionaryElement
+    ): TimeLineEvent()
+
+    data class CreateNewTag(
+        val tag: DictionaryElement
+    ): TimeLineEvent()
+
+    object CancelNewTag: TimeLineEvent()
+
+    data class ChangeNewTagType(
+        val tag: DictionaryElement,
+        val type: NoteType
     ): TimeLineEvent()
 }

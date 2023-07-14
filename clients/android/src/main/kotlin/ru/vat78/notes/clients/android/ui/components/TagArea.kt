@@ -128,7 +128,7 @@ fun TagTable(
                while (i < tags.size) {
                    val tag = tags[i]
                    val text = cutText(tag.caption, 40)
-                   if (curLength > 0 && text.length > 42 - curLength) {
+                   if (curLength > 0 && text.length > 30 - curLength) {
                        break
                    }
                    curLength += text.length

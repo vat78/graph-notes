@@ -16,7 +16,7 @@ interface NoteStorage {
     fun buildNewNote(type: NoteType, text: String, parent: Note? = null, insertions: Set<DictionaryElement> = emptySet())
     suspend fun getNoteWithParents(uuid: String): NoteWithParents
     suspend fun getNoteWithChildren(uuid: String): NoteWithChildren
-    suspend fun saveNote(note: Note, parents: Set<DictionaryElement>)
+    suspend fun saveNote(note: Note, parents: Set<DictionaryElement>): Note
     suspend fun updateNote(note: Note)
 }
 

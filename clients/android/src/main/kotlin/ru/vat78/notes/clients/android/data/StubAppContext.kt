@@ -86,7 +86,7 @@ class StubAppContext : AppContext {
                 TODO("Not yet implemented")
             }
 
-            override suspend fun saveNote(note: Note, parents: Set<DictionaryElement>) {
+            override suspend fun saveNote(note: Note, parents: Set<DictionaryElement>): Note {
                 TODO("Not yet implemented")
             }
 

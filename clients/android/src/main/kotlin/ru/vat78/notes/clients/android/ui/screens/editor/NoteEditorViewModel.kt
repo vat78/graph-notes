@@ -11,12 +11,15 @@ import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.NoteWithParents
+import ru.vat78.notes.clients.android.data.generateTime
 import ru.vat78.notes.clients.android.data.getWordsForSearch
 import ru.vat78.notes.clients.android.ui.ext.analyzeTags
 import ru.vat78.notes.clients.android.ui.ext.insertCaptions
 import ru.vat78.notes.clients.android.ui.ext.insertSuggestedTag
 import ru.vat78.notes.clients.android.ui.ext.insertTags
 import ru.vat78.notes.clients.android.ui.ext.pmap
+import java.time.ZonedDateTime
+import java.util.*
 
 class NoteEditorViewModel(
     private val appState: AppState,
@@ -54,6 +57,9 @@ class NoteEditorViewModel(
             is NotesEditorUiEvent.RemoveTag -> removeTag(event.tag, state.value)
             is NotesEditorUiEvent.RequestSuggestions -> loadSuggestions(event.text, state.value)
             is NotesEditorUiEvent.ChangeDescriptionFocus -> changeDescriptionFocus(event.focus, state.value)
+            is NotesEditorUiEvent.CreateNewTag -> createNewTag(state.value, event.tag)
+            is NotesEditorUiEvent.CancelNewTag -> cancelNewTag(state.value)
+            is NotesEditorUiEvent.ChangeNewTagType -> changeTypeOnNewTag(state.value, event.tag, event.type)
         }
     }
 
@@ -165,6 +171,10 @@ class NoteEditorViewModel(
     }
 
     private fun addTag(tag: DictionaryElement, oldState: NoteEditorUiState) {
+        if (tag.id.isBlank()) {
+            _state.tryEmit(oldState.copy(newTag = tag))
+            return
+        }
         val newTags = oldState.changed.parents + tag
         if (oldState.descriptionFocus == DescriptionFocusState.FOCUSED) {
             val text = oldState.descriptionTextValue.insertSuggestedTag(tag, tagSymbols)
@@ -204,7 +214,8 @@ class NoteEditorViewModel(
     private fun loadSuggestions(text: String, oldState: NoteEditorUiState) {
         viewModelScope.launch {
             val newSuggestions = services
-                .tagSearchService.searchTagSuggestions(text, oldState.changed)
+                .tagSearchService.searchTagSuggestions(text, oldState.changed)  +
+                    newDictionaryElementForSuggestion('#', text)
             _state.emit(
                 oldState.copy(
                     suggestions = newSuggestions
@@ -282,11 +293,12 @@ class NoteEditorViewModel(
                 val tagSymbol = tagText.first()
                 val excludedTypes = if (tagSymbol == '#') emptyList() else noteTypes.values.filter { it.symbol != tagSymbol}.map { it.id }
                 val hierarchical = oldState.changed.parents.filter { it.type.hierarchical }.map { it.type.id }.toSet()
+                val textForSearch = tagText.substring(1)
                 val suggestions = services.tagSearchService.searchTagSuggestions(
-                    words = getWordsForSearch(tagText.substring(1)),
+                    words = getWordsForSearch(textForSearch),
                     excludedTypes = excludedTypes + hierarchical,
                     excludedTags = emptySet()
-                )
+                ) + newDictionaryElementForSuggestion(tagSymbol, textForSearch)
                 _state.emit(_state.value.copy(suggestions = suggestions))
             }
         } else {
@@ -304,5 +316,37 @@ class NoteEditorViewModel(
 //                _state.emit(_state.value.copy(suggestions = suggestions))
 //            }
 //        }
+    }
+
+    private fun createNewTag(oldState: NoteEditorUiState, tag: DictionaryElement) {
+        val newTag = Note(
+            id = UUID.randomUUID().toString(),
+            type =  tag.type,
+            caption = tag.caption,
+            start = generateTime(tag.type.defaultStart, { ZonedDateTime.now() }),
+            finish = generateTime(tag.type.defaultFinish, { ZonedDateTime.now() }),
+        )
+        viewModelScope.launch {
+            val savedNote = services.noteStorage.saveNote(newTag, emptySet())
+            addTag(DictionaryElement(savedNote), oldState.copy(newTag = null))
+        }
+    }
+
+    private fun cancelNewTag(oldState: NoteEditorUiState) {
+        _state.tryEmit(oldState.copy(newTag = null))
+    }
+
+    private fun changeTypeOnNewTag(oldState: NoteEditorUiState, tag: DictionaryElement, newType: NoteType) {
+        val newTag = tag.copy(type = newType)
+        _state.tryEmit(oldState.copy(newTag = newTag))
+    }
+
+    private fun newDictionaryElementForSuggestion(tagSymbol: Char, tagText: String) : DictionaryElement {
+        val tagType = noteTypes.values.first { it.symbol == tagSymbol }
+        return DictionaryElement(
+            id = "",
+            type = tagType,
+            caption = tagText
+        )
     }
 }
