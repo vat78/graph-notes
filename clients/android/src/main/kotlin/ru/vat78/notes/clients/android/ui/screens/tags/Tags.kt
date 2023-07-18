@@ -51,7 +51,7 @@ fun Tags(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
     val tagTabs = listOf(
-        NavigationIcon(Icons.Filled.List, "",  {}),
+        NavigationIcon(Icons.Filled.List, "",  {}, true),
         NavigationIcon(
             icon = Icons.Filled.Note,
             description = "",

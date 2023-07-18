@@ -69,7 +69,7 @@ fun TagTopBarPreview() {
     GraphNotesTheme {
         TagTopBar(
             caption = "Preview!",
-            tabs = listOf(NavigationIcon(Icons.Filled.List, "", {}),
+            tabs = listOf(NavigationIcon(Icons.Filled.List, "", {}, true),
                 NavigationIcon(Icons.Filled.Note, "", {}))
         )
     }
@@ -85,7 +85,7 @@ fun TagTopBarPreviewDark() {
     GraphNotesTheme{
         TagTopBar(
             caption = "Preview!",
-            tabs = listOf(NavigationIcon(Icons.Filled.List, "", {}),
+            tabs = listOf(NavigationIcon(Icons.Filled.List, "", {}, true),
                 NavigationIcon(Icons.Filled.Note, "", {}))
         )
     }

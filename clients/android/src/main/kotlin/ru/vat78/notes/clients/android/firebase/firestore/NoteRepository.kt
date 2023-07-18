@@ -141,7 +141,7 @@ class NoteRepository (
         return withContext(Dispatchers.IO) {
             if (note.type.tag) {
                 val savedNote = getNoteByCaption(note.caption)
-                if (savedNote != null) return@withContext savedNote
+                if (savedNote != null && note.id != savedNote.id) return@withContext savedNote
             }
             val parentsFromDb = getParentIds(note.id).toSet()
             firestore.collection(USER_COLLECTION)

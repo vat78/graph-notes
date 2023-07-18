@@ -20,7 +20,8 @@ import ru.vat78.notes.clients.android.R
 data class NavigationIcon(
     val icon: ImageVector,
     val description: String,
-    val action: () -> Unit
+    val action: () -> Unit,
+    val selected: Boolean = false
 )
 
 @Composable
