@@ -53,13 +53,18 @@ fun AppBarTabs(
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 for (tab in tabs) {
-                    Icon(
-                        imageVector = tab.icon,
-                        contentDescription = tab.description,
-                        modifier = Modifier.weight(1f).clickable {
-                            tab.action.invoke()
-                        }
-                    )
+                    Surface(
+                        modifier = Modifier.weight(1f),
+                        tonalElevation = if (tab.selected) 36.dp else 0.dp
+                    ) {
+                        Icon(
+                            imageVector = tab.icon,
+                            contentDescription = tab.description,
+                            modifier = Modifier.clickable {
+                                tab.action.invoke()
+                            },
+                        )
+                    }
                 }
             }
         }

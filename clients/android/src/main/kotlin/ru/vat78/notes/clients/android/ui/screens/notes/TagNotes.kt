@@ -52,7 +52,7 @@ fun TagNotes(
     val tagTabs = listOf(
         NavigationIcon(Icons.Filled.List, "",
             { appState.navigate("${TagListScreen.route}/${uiState.rootNote.type.id}?root=$rootId") }),
-        NavigationIcon(icon = Icons.Filled.Note, description = "", action = { })
+        NavigationIcon(icon = Icons.Filled.Note, description = "", action = { }, selected = true)
     )
 
     Scaffold (
