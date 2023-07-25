@@ -72,6 +72,7 @@ fun GraphNotesApp() {
         }
 
         val appState = rememberAppState()
+        appState.context.services.init(LocalContext.current)
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
         val userLoginScreen = remember { mutableStateOf(false) }

@@ -12,11 +12,11 @@ class UserRepository(
     val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : UserStorage {
 
-    override suspend fun saveUser(user: User?) {
+    override suspend fun saveUser(newUser: User?) {
         withContext(Dispatchers.IO) {
-            if (user != null) {
-                firestore.collection(USER_COLLECTION).document(user.id).set(user, SetOptions.merge())
-                Log.i("User repository", "User ${user.name} saved to database")
+            if (newUser != null) {
+                firestore.collection(USER_COLLECTION).document(newUser.id).set(newUser, SetOptions.merge())
+                Log.i("User repository", "User ${newUser.name} saved to database")
             }
         }
     }

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.app.plugin)
     alias(libs.plugins.kotlin.android.plugin)
     alias(libs.plugins.google.services.plugin)
+    alias(libs.plugins.kapt.plugin)
 }
 
 android {
@@ -13,7 +14,7 @@ android {
         minSdk = 30
         targetSdk = 32
         versionCode = 1
-        versionName = "0.1.9"
+        versionName = "0.2.0"
 
         testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -28,6 +29,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    java {
+        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    }
+
     kotlinOptions {
         jvmTarget = "17"
     }
@@ -37,9 +43,8 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.5"
+        kotlinCompilerExtensionVersion = "1.4.6"
     }
-
 }
 
 dependencies {
@@ -61,6 +66,9 @@ dependencies {
 
     implementation(libs.google.accompanist.permissions)
     implementation(libs.google.play.services.auth)
+
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
 
     implementation(platform(libs.firebase.bom))
     implementation("com.google.firebase:firebase-auth-ktx")

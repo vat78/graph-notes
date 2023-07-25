@@ -25,7 +25,7 @@ class StubAppContext : AppContext {
         get() = User("0", "ANONIMUS", email = "anonimus@test.org")
     override val userStorage: UserStorage
         get() = object: UserStorage {
-            override suspend fun saveUser(user: User?) {
+            override suspend fun saveUser(newUser: User?) {
             }
         }
 

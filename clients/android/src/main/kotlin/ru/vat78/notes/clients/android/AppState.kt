@@ -10,8 +10,8 @@ class AppState(
     val navController: NavHostController,
     private val resources: Resources,
     val coroutineScope: CoroutineScope,
+    val context:ApplicationContext = ApplicationContext()
 ) {
-    val context = ApplicationContext()
 
     fun popUp() {
         navController.popBackStack()

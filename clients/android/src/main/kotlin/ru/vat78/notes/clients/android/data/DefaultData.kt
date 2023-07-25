@@ -27,7 +27,7 @@ val defaultTypes = listOf(
         icon = "Note",
         tag = false,
         hierarchical = false,
-        symbol = '#',
+        symbol = '-',
         defaultStart = TimeDefault.PREVIOUS_NOTE,
         defaultFinish = TimeDefault.NOW,
         default = true
@@ -64,7 +64,7 @@ val defaultTypes = listOf(
         icon = "House",
         tag = true,
         hierarchical = false,
-        symbol = '#',
+        symbol = '^',
         defaultStart = TimeDefault.START_OF_TIME,
         defaultFinish = TimeDefault.END_OF_TIME
     ),

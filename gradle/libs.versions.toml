@@ -41,13 +41,14 @@ junit = "4.13.2"
 kotlin = "1.8.20"
 maps-compose = "2.5.3"
 material = "1.7.0-beta01"
+sqlite_version = "2.3.1"
 
 okhttp = "4.10.0"
 quarkus = "2.7.1.Final"
 # @pin Bump to latest after Espresso 3.5.0 goes stable (due to https://github.com/robolectric/robolectric/issues/6593)
 roboelectric = "4.5.1"
 rome = "1.18.0"
-room = "2.5.0-alpha02"
+room = "2.5.2"
 secrets = "2.0.1"
 # @keep
 targetSdk = "33"
@@ -58,6 +59,7 @@ android-app-plugin = { id = "com.android.application",version.ref = "androidGrad
 google-services-plugin = { id = "com.google.gms.google-services", version = "4.3.15" }
 hilt-plugin = { id = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
 jetbrains-compose-plugin = { id = "org.jetbrains.compose", version = "1.4.0" }
+kapt-plugin = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-android-plugin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-plugin = { id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-jvm-plugin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -113,6 +115,9 @@ androidx-palette = { module = "androidx.palette:palette", version.ref = "android
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite_version" }
+sqlite-ktx = { module = "androidx.sqlite:sqlite-ktx", version.ref = "sqlite_version" }
+sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "sqlite_version" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test" }
 androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-test-espresso" }
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-test-ext-junit" }

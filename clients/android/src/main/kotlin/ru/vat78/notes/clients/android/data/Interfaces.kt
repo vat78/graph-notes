@@ -1,7 +1,7 @@
 package ru.vat78.notes.clients.android.data
 
 interface UserStorage {
-    suspend fun saveUser(user: User?)
+    suspend fun saveUser(newUser: User?)
 }
 
 interface NoteTypeStorage {
