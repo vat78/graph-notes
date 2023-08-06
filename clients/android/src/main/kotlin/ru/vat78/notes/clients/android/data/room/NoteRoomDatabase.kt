@@ -23,7 +23,7 @@ import ru.vat78.notes.clients.android.data.room.entity.WordEntity
         LinkEntity::class,
         WordEntity::class,
         SuggestionEntity::class],
-    version = 3)
+    version = 4)
 abstract class NoteRoomDatabase: RoomDatabase() {
     abstract fun noteTypeDao(): NoteTypeDao
     abstract fun noteDao(): NoteDao

@@ -18,4 +18,7 @@ interface SuggestionDao {
 
     @Query("DELETE FROM suggestions")
     fun cleanup(): Int
+
+    @Query("DELETE FROM suggestions WHERE tagId = :tagId")
+    fun deleteForTag(tagId: String): Int
 }

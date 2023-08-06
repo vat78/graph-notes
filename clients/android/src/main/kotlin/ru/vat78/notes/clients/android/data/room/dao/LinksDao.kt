@@ -1,6 +1,7 @@
 package ru.vat78.notes.clients.android.data.room.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import ru.vat78.notes.clients.android.data.room.entity.LinkEntity
@@ -18,4 +19,10 @@ interface LinksDao {
 
     @Query("DELETE FROM links")
     fun cleanup(): Int
+
+    @Query("SELECT * FROM links WHERE lastUpdate BETWEEN :from AND :to")
+    fun getLinksForSync(from: Long, to: Long): List<LinkEntity>
+
+    @Delete
+    fun delete(vararg links: LinkEntity)
 }

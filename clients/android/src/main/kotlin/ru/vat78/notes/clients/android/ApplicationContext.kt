@@ -1,31 +1,47 @@
 
 package ru.vat78.notes.clients.android
 
+import android.content.Context
 import android.util.Log
+import androidx.work.Constraints
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.plus
-import ru.vat78.notes.clients.android.data.AppContext
-import ru.vat78.notes.clients.android.data.StubAppContext
+import ru.vat78.notes.clients.android.data.AppStorage
 import ru.vat78.notes.clients.android.data.User
 import ru.vat78.notes.clients.android.data.defaultTypes
 import ru.vat78.notes.clients.android.data.room.RoomContext
+import ru.vat78.notes.clients.android.data.syncData
 import ru.vat78.notes.clients.android.firebase.firestore.FirestoreContext
+import java.time.Instant
+import java.util.concurrent.TimeUnit
+
+private var externalStorage: AppStorage? = null
+private val _services : RoomContext = RoomContext()
 
 class ApplicationContext {
+
+    private val constraints = Constraints.Builder()
+        .setRequiredNetworkType(NetworkType.CONNECTED)
+        .build()
+    private val workManager = WorkManager.getInstance()
+
+    val services: RoomContext
+        get() = _services
+
     val currentUser = MutableSharedFlow<User?>(
         replay = 0,
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
-
-    private var _externalStorage: AppContext = StubAppContext()
-    val externalStorage: AppContext
-        get() = _externalStorage
-
-    val services : RoomContext = RoomContext()
 
     private val eventHandler = AppEventHandler(this, MainScope().plus(CoroutineName("AppEventHandler")))
 
@@ -34,17 +50,29 @@ class ApplicationContext {
     }
 
     suspend fun setUser(user: User?) {
-        _externalStorage = if (user == null) StubAppContext() else FirestoreContext(user)
+        externalStorage = if (user == null) null else FirestoreContext(user)
         val newUser = user ?: services.user
         services.userStorage.saveUser(newUser)
-        reloadTypes()
+        initSync()
         currentUser.emit(newUser)
         Log.i("Application context", "The current user has been changed on ${user?.name}")
     }
 
+    private suspend fun initSync() {
+        if (externalStorage == null) {
+            workManager.cancelUniqueWork("SYNC")
+            return
+        }
+        reloadTypes()
+        val syncRequest = PeriodicWorkRequestBuilder<SyncWorker>(5, TimeUnit.MINUTES)
+            .setConstraints(constraints)
+            .build()
+        workManager.enqueueUniquePeriodicWork("SYNC", ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, syncRequest)
+    }
+
     private suspend fun reloadTypes() {
-        _externalStorage.noteTypeStorage.reload()
-        val types = _externalStorage.noteTypeStorage.types.values
+        externalStorage!!.noteTypeStorage.reload()
+        val types = externalStorage!!.noteTypeStorage.types.values
         Log.i("Application context", "Types from external $types")
         if (types.isEmpty()) {
             services.syncTypes(defaultTypes)
@@ -52,5 +80,19 @@ class ApplicationContext {
             services.syncTypes(types)
         }
     }
+}
 
+class SyncWorker(
+    appContext: Context,
+    workerParams: WorkerParameters
+): CoroutineWorker(appContext, workerParams) {
+
+    override suspend fun doWork(): Result {
+        val timestamp = Instant.now().epochSecond
+        if (externalStorage != null) {
+            Log.i("SyncWorker", "Data sync started at $timestamp")
+            syncData(_services, externalStorage!!, timestamp)
+        }
+        return Result.success()
+    }
 }

@@ -5,9 +5,10 @@ import android.util.Log
 import androidx.room.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import ru.vat78.notes.clients.android.data.AppContext
+import ru.vat78.notes.clients.android.data.AppStorage
 import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.data.NoteLink
 import ru.vat78.notes.clients.android.data.NoteStorage
 import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.NoteTypeStorage
@@ -17,6 +18,7 @@ import ru.vat78.notes.clients.android.data.NotesFilter
 import ru.vat78.notes.clients.android.data.TagSearchService
 import ru.vat78.notes.clients.android.data.User
 import ru.vat78.notes.clients.android.data.UserStorage
+import ru.vat78.notes.clients.android.data.buildSearchBlocks
 import ru.vat78.notes.clients.android.data.generateTime
 import ru.vat78.notes.clients.android.data.room.entity.LinkEntity
 import ru.vat78.notes.clients.android.data.room.entity.NoteEntity
@@ -25,8 +27,9 @@ import ru.vat78.notes.clients.android.data.room.entity.SuggestionEntity
 import ru.vat78.notes.clients.android.data.room.entity.UserEntity
 import ru.vat78.notes.clients.android.data.room.entity.WordEntity
 import java.time.ZonedDateTime
+import java.util.UUID
 
-class RoomContext(): AppContext {
+class RoomContext(): AppStorage {
 
     private var DB_INSTANCE: NoteRoomDatabase? = null
 
@@ -51,10 +54,10 @@ class RoomContext(): AppContext {
     override val user: User
         get() = _user ?: ANONYMOUS
 
-    override val userStorage: UserStorage = UserRepository()
+    override val userStorage = UserRepository()
     override val noteTypeStorage = NoteTypeRepository()
-    override val noteStorage: NoteStorage = NoteRepository()
-    override val tagSearchService: TagSearchService = TagSearchRepository()
+    override val noteStorage = NoteRepository()
+    override val tagSearchService = TagSearchRepository()
 
     suspend fun syncTypes(types: Collection<NoteType>) {
         withContext(Dispatchers.IO) {
@@ -68,11 +71,23 @@ class RoomContext(): AppContext {
     }
 
     inner class UserRepository: UserStorage {
+        override suspend fun getLastSyncTimestamp(userId: String, deviceId: String): Long {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun saveLastSyncTimestamp(userId: String, deviceId: String, timestamp: Long) {
+            TODO("Not yet implemented")
+        }
+
+        suspend fun getCurrentUser(): UserEntity? {
+            val existingUsers = DB_INSTANCE!!.userDao().getAll()
+            Log.i("RoomUserRepository", "Users in local DB: $existingUsers")
+            return if (existingUsers.isEmpty()) null else existingUsers[0]
+        }
+
         override suspend fun saveUser(newUser: User?) {
             withContext(Dispatchers.IO) {
-                val existingUsers = DB_INSTANCE!!.userDao().getAll()
-                Log.i("RoomUserRepository", "Users in local DB: $existingUsers")
-                val oldUser = if (existingUsers.isEmpty()) null else existingUsers[0]
+                val oldUser = getCurrentUser()
                 _user =
                     if (oldUser == null || oldUser.id == "0") null else User(oldUser.id, oldUser.name, oldUser.email)
                 if (newUser == _user) return@withContext
@@ -86,7 +101,8 @@ class RoomContext(): AppContext {
                     DB_INSTANCE!!.wordDao().cleanup()
                 }
                 _user = newUser
-                DB_INSTANCE!!.userDao().save(UserEntity(user.id, user.name, user.email))
+                val deviceId = oldUser?.deviceId ?: UUID.randomUUID().toString()
+                DB_INSTANCE!!.userDao().save(UserEntity(user.id, user.name, user.email, deviceId))
             }
         }
     }
@@ -199,6 +215,27 @@ class RoomContext(): AppContext {
             }
         }
 
+        override suspend fun getNotesForSync(from: Long, to: Long): List<Note> {
+            val safeFrom = if (from == 0L) 1 else from
+            return withContext(Dispatchers.IO) {
+                val entities = DB_INSTANCE!!.noteDao().getNotesForSync(safeFrom, to)
+                if (entities.isNotEmpty()) {
+                    val types = noteTypeStorage.types
+                    return@withContext entities.map { it.toNote(types) }.toList()
+                }
+                return@withContext emptyList<Note>()
+            }
+        }
+
+        override suspend fun getLinksForSync(from: Long, to: Long): List<NoteLink> {
+            val safeFrom = if (from == 0L) 1 else from
+            return withContext(Dispatchers.IO) {
+                DB_INSTANCE!!.linkDao().getLinksForSync(safeFrom, to)
+                    .map { NoteLink(it.parent, it.child, it.deleted, lastUpdate = 0) }
+                    .toList()
+            }
+        }
+
         private suspend fun getNoteEntities(filter: NotesFilter): List<NoteEntity> {
             if (filter.noteIdsForLoad?.isEmpty() == true) {
                 return emptyList()
@@ -220,6 +257,32 @@ class RoomContext(): AppContext {
                         DB_INSTANCE!!.noteDao().findByIds(types, filter.noteIdsForLoad)
                     }
                 }
+            }
+        }
+
+        suspend fun saveNotes(vararg notes:NoteEntity) {
+            withContext(Dispatchers.IO) {
+                DB_INSTANCE!!.noteDao().saveAll(*notes)
+            }
+        }
+
+        suspend fun deleteNotes(vararg notes:NoteEntity) {
+            withContext(Dispatchers.IO) {
+                DB_INSTANCE!!.noteDao().delete(*notes)
+            }
+        }
+
+        override suspend fun deleteLinks(links: List<NoteLink>) {
+            val entities = links.map { LinkEntity(it) }.toTypedArray()
+            withContext(Dispatchers.IO) {
+                DB_INSTANCE!!.linkDao().delete(*entities)
+            }
+        }
+
+        override suspend fun saveSyncingLinks(links: List<NoteLink>) {
+            val entities = links.map { LinkEntity(it, cleanLastUpdate = true) }.toTypedArray()
+            withContext(Dispatchers.IO) {
+                DB_INSTANCE!!.linkDao().save(*entities)
             }
         }
     }
@@ -251,6 +314,14 @@ class RoomContext(): AppContext {
                 DB_INSTANCE!!.wordDao().insert(*newWords)
                 val suggestions = DB_INSTANCE!!.wordDao().findWords(tokens).map { SuggestionEntity(it.wordId, tagId, typeId) }.toTypedArray()
                 DB_INSTANCE!!.suggestionDao().insert(*suggestions)
+            }
+        }
+
+        suspend fun updateTagSuggestions(tag: Note) {
+            withContext(Dispatchers.IO) {
+                DB_INSTANCE!!.suggestionDao().deleteForTag(tag.id)
+                val tokens = buildSearchBlocks(tag.caption)
+                updateTagSuggestions(tokens, tag.id, tag.type.id)
             }
         }
     }

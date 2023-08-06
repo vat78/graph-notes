@@ -63,6 +63,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.compose.ui.googlefonts)
     implementation(libs.androidx.compose.runtime.livedata)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.work.ktx)
 
     implementation(libs.google.accompanist.permissions)
     implementation(libs.google.play.services.auth)

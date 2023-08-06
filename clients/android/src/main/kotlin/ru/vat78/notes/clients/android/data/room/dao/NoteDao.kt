@@ -1,6 +1,7 @@
 package ru.vat78.notes.clients.android.data.room.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import ru.vat78.notes.clients.android.data.room.entity.NoteEntity
@@ -10,6 +11,9 @@ interface NoteDao {
 
     @Upsert
     fun save(note: NoteEntity)
+
+    @Upsert
+    fun saveAll(vararg notes: NoteEntity)
 
     @Query("SELECT * FROM notes WHERE id = :id")
     fun findById(id: String): List<NoteEntity>
@@ -37,4 +41,10 @@ interface NoteDao {
 
     @Query("DELETE FROM notes")
     fun cleanup(): Int
+
+    @Query("SELECT * FROM notes WHERE lastUpdate BETWEEN :from AND :to")
+    fun getNotesForSync(from: Long, to: Long): List<NoteEntity>
+
+    @Delete
+    fun delete(vararg notes: NoteEntity)
 }

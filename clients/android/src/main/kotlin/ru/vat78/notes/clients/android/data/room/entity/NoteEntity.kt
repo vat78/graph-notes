@@ -30,7 +30,7 @@ data class NoteEntity(
     val lastUpdate: Long
 ) {
 
-    constructor (note: Note) : this (
+    constructor (note: Note, cleanLastUpdate:Boolean = false) : this (
         id = note.id,
         typeId = note.type.id,
         caption = note.caption.ifBlank { null },
@@ -40,7 +40,7 @@ data class NoteEntity(
         finish = note.finish.toEpochSecond(),
         root = note.root,
         deleted = false,
-        lastUpdate = Instant.now().epochSecond,
+        lastUpdate = if (cleanLastUpdate) 0 else Instant.now().epochSecond,
         suggestions = note.textInsertions.entries.map { "${it.key}|${it.value.caption}" }.joinToString("|")
     )
 
@@ -55,6 +55,8 @@ data class NoteEntity(
             finish = ZonedDateTime.ofInstant(Instant.ofEpochSecond(finish), TimeZone.getDefault().toZoneId()),
             root = root,
             textInsertions = parseSuggestions(suggestions),
+            lastUpdate = lastUpdate,
+            deleted = deleted
         )
     }
 

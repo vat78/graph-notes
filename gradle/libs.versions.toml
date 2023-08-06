@@ -42,6 +42,7 @@ kotlin = "1.8.20"
 maps-compose = "2.5.3"
 material = "1.7.0-beta01"
 sqlite_version = "2.3.1"
+work_version = "2.8.1"
 
 okhttp = "4.10.0"
 quarkus = "2.7.1.Final"
@@ -115,6 +116,8 @@ androidx-palette = { module = "androidx.palette:palette", version.ref = "android
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "work_version" }
+androidx-work-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work_version" }
 sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite_version" }
 sqlite-ktx = { module = "androidx.sqlite:sqlite-ktx", version.ref = "sqlite_version" }
 sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "sqlite_version" }

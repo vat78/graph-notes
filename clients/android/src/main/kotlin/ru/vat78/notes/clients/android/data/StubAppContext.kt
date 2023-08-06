@@ -5,7 +5,7 @@ import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
-class StubAppContext : AppContext {
+class StubAppContext : AppStorage {
     private val notes: MutableList<Note> = arrayListOf(
         Note(type = defaultTypes.first { it.default }, caption = "test 1"),
         Note(type = defaultTypes.first { it.default }, caption = "Test 2"),
@@ -26,6 +26,12 @@ class StubAppContext : AppContext {
     override val userStorage: UserStorage
         get() = object: UserStorage {
             override suspend fun saveUser(newUser: User?) {
+            }
+            override suspend fun getLastSyncTimestamp(userId: String, deviceId: String): Long {
+                TODO("Not yet implemented")
+            }
+            override suspend fun saveLastSyncTimestamp(userId: String, deviceId: String, timestamp: Long) {
+                TODO("Not yet implemented")
             }
         }
 
@@ -95,6 +101,22 @@ class StubAppContext : AppContext {
             }
 
             override suspend fun updateNote(note: Note) {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun getNotesForSync(from: Long, to: Long): List<Note> {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun getLinksForSync(from: Long, to: Long): List<NoteLink> {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun deleteLinks(links: List<NoteLink>) {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun saveSyncingLinks(links: List<NoteLink>) {
                 TODO("Not yet implemented")
             }
         }

@@ -2,6 +2,7 @@ package ru.vat78.notes.clients.android.data
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import java.time.Instant
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -15,7 +16,17 @@ data class Note(
     val start: ZonedDateTime = ZonedDateTime.now(),
     val finish: ZonedDateTime = ZonedDateTime.now(),
     val root: Boolean = false,
-    val textInsertions: Map<String, DictionaryElement> = emptyMap()
+    val textInsertions: Map<String, DictionaryElement> = emptyMap(),
+    val lastUpdate: Long = Instant.now().epochSecond,
+    val deleted: Boolean = false
+)
+
+@Immutable
+data class NoteLink(
+    val parentId: String,
+    val childId: String,
+    val deleted: Boolean,
+    val lastUpdate: Long = Instant.now().epochSecond
 )
 
 @Immutable

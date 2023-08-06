@@ -2,6 +2,8 @@ package ru.vat78.notes.clients.android.data
 
 interface UserStorage {
     suspend fun saveUser(newUser: User?)
+    suspend fun getLastSyncTimestamp(userId: String, deviceId: String): Long?
+    suspend fun saveLastSyncTimestamp(userId: String, deviceId: String, timestamp: Long)
 }
 
 interface NoteTypeStorage {
@@ -18,6 +20,12 @@ interface NoteStorage {
     suspend fun getNoteWithChildren(uuid: String): NoteWithChildren
     suspend fun saveNote(note: Note, parents: Set<DictionaryElement>): Note
     suspend fun updateNote(note: Note)
+    suspend fun getNotesForSync(from: Long, to: Long): List<Note>
+    suspend fun getLinksForSync(from: Long, to: Long): List<NoteLink>
+
+    suspend fun deleteLinks(links: List<NoteLink>)
+    suspend fun saveSyncingLinks(links: List<NoteLink>)
+
 }
 
 abstract class TagSearchService {
@@ -58,7 +66,7 @@ abstract class TagSearchService {
     }
 }
 
-interface AppContext {
+interface AppStorage {
     val user: User
     val userStorage: UserStorage
     val noteTypeStorage: NoteTypeStorage
