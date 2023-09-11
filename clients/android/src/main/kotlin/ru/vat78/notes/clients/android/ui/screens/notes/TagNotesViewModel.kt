@@ -108,7 +108,9 @@ class TagNotesViewModel(
                 val suggestions = services.tagSearchService.searchTagSuggestions(
                     words = getWordsForSearch(tagText.substring(1)),
                     excludedTypes = excludedTypes + hierarchical,
-                    excludedTags = emptySet()
+                    selectedType = "",
+                    excludedTags = emptySet(),
+                    maxCount = 5
                 )
                 _state.emit(_state.value.copy(suggestions = suggestions))
             }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.data.Note
@@ -22,6 +23,7 @@ fun TagListView(
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
     onNoteClick: (Note) -> Unit = { },
+    onTextInput: (TextFieldValue) -> Unit = { },
     onCreateNote: (String) -> Unit = { }
 ) {
     val scope = rememberCoroutineScope()
@@ -34,6 +36,7 @@ fun TagListView(
         )
         SmallTagEditor(
             onEventInput = onCreateNote,
+            onTextInput = onTextInput,
             resetScroll = {
                 scope.launch {
                     scrollState.scrollToItem(0)

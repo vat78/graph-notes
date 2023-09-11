@@ -11,7 +11,7 @@
     <string name="menu">Menu</string>
     <string name="add">Create</string>
 
-    <string name="jump_to_begin">Jump to top</string>
+    <string name="jump_to_begin">Jump to bottom</string>
 
     <string name="textfield_hint">Input text of a new note</string>
     <string name="textinput_desc">Text input</string>

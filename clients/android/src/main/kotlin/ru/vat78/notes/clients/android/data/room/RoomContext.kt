@@ -27,7 +27,7 @@ import ru.vat78.notes.clients.android.data.room.entity.SuggestionEntity
 import ru.vat78.notes.clients.android.data.room.entity.UserEntity
 import ru.vat78.notes.clients.android.data.room.entity.WordEntity
 import java.time.ZonedDateTime
-import java.util.UUID
+import java.util.*
 
 class RoomContext(): AppStorage {
 
@@ -291,12 +291,21 @@ class RoomContext(): AppStorage {
         override suspend fun searchTagSuggestions(
             words: Set<String>,
             excludedTypes: List<String>,
-            excludedTags: Set<String>
+            selectedType: String,
+            excludedTags: Set<String>,
+            maxCount: Int
         ): List<DictionaryElement> {
             return withContext(Dispatchers.IO) {
                 val wordIds = DB_INSTANCE!!.wordDao().findWords(words).map { it.wordId }.toList()
-                DB_INSTANCE!!.noteDao().findTagsForSuggestions(wordIds, excludedTypes, excludedTags)
+                Log.i("RoomTagSearchRepository", "Found ids $wordIds for words: ${words}")
+                val result = if (selectedType.isBlank()) DB_INSTANCE!!.noteDao()
+                    .findTagsForSuggestions(wordIds, excludedTypes, excludedTags)
                     .map { it.toDictionary(noteTypeStorage.types) }.toList()
+                else DB_INSTANCE!!.noteDao().findTagsForSuggestions(wordIds, selectedType, excludedTags)
+                    .map { it.toDictionary(noteTypeStorage.types) }.toList()
+
+                Log.i("RoomTagSearchRepository", "Found ${result} suggestions by words")
+                if (maxCount == 0) result else result.take(maxCount)
             }
         }
 

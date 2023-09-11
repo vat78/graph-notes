@@ -86,7 +86,8 @@ fun Tags(
                 onCreateNote = { content ->
                     viewModel.sendEvent(TagsUiEvent.CreateTag(uiState.tagType, content, uiState.rootNote))
                     onCreateNote()
-                }
+                },
+                onTextInput = { text -> viewModel.sendEvent(TagsUiEvent.NewTextInput(text)) }
             )
         }
     )

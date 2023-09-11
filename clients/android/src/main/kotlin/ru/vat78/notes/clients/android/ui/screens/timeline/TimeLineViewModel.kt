@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import ru.vat78.notes.clients.android.AppEvent
 import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.base.BaseViewModel
 import ru.vat78.notes.clients.android.base.ListState
@@ -62,6 +63,7 @@ class TimeLineViewModel(
         viewModelScope.launch {
             val savedNote = services.noteStorage.saveNote(newTag, emptySet())
             insertSuggestion(oldState.copy(newTag = null), DictionaryElement(savedNote))
+            appState.context.riseEvent(AppEvent.NoteSaved(Note(), savedNote))
         }
     }
 
@@ -108,7 +110,9 @@ class TimeLineViewModel(
                 val suggestions = services.tagSearchService.searchTagSuggestions(
                     words = getWordsForSearch(textForSearch),
                     excludedTypes = excludedTypes + hierarchical,
-                    excludedTags = emptySet()
+                    selectedType = "",
+                    excludedTags = emptySet(),
+                    maxCount = 5
                 ) + newDictionaryElementForSuggestion(tagSymbol, textForSearch)
                 _state.emit(_state.value.copy(suggestions = suggestions))
             }

@@ -39,6 +39,9 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE id in (SELECT tagId FROM suggestions WHERE wordId in (:wordIds) and tagId not in (:excludedTags) and typeId not in (:excludedTypes))")
     fun findTagsForSuggestions(wordIds: List<Long>, excludedTypes: List<String>, excludedTags: Collection<String>): List<NoteEntity>
 
+    @Query("SELECT * FROM notes WHERE id in (SELECT tagId FROM suggestions WHERE wordId in (:wordIds) and tagId not in (:excludedTags) and typeId = :type)")
+    fun findTagsForSuggestions(wordIds: List<Long>, type: String, excludedTags: Collection<String>): List<NoteEntity>
+
     @Query("DELETE FROM notes")
     fun cleanup(): Int
 

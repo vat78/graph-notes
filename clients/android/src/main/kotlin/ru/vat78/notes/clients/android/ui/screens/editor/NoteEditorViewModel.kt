@@ -297,7 +297,9 @@ class NoteEditorViewModel(
                 val suggestions = services.tagSearchService.searchTagSuggestions(
                     words = getWordsForSearch(textForSearch),
                     excludedTypes = excludedTypes + hierarchical,
-                    excludedTags = emptySet()
+                    selectedType = "",
+                    excludedTags = emptySet(),
+                    maxCount = 5
                 ) + newDictionaryElementForSuggestion(tagSymbol, textForSearch)
                 _state.emit(_state.value.copy(suggestions = suggestions))
             }

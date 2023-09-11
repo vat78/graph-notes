@@ -34,7 +34,9 @@ class TagSearchRepository(
     override suspend fun searchTagSuggestions(
         words: Set<String>,
         excludedTypes: List<String>,
-        excludedTags: Set<String>
+        selectedType: String,
+        excludedTags: Set<String>,
+        maxCount: Int
     ): List<DictionaryElement> {
         val result = withContext(Dispatchers.IO) {
             val ids = words.asIterable()

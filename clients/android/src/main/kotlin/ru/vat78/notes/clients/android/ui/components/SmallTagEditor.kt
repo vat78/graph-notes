@@ -38,6 +38,7 @@ import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 @Composable
 fun SmallTagEditor(
     onEventInput: (String) -> Unit,
+    onTextInput: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
     resetScroll: () -> Unit = {}
 ) {
@@ -53,7 +54,7 @@ fun SmallTagEditor(
             Box(modifier = Modifier.fillMaxWidth(0.75f)) {
                 UserInputText(
                     textFieldValue = textState,
-                    onTextChanged = { textState = it },
+                    onTextChanged = { onTextInput.invoke(it); textState = it },
                     // Only show the keyboard if there's no input selector and text field has focus
                     keyboardShown = textFieldFocusState,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
@@ -115,6 +116,6 @@ fun SmallTagEditor(
 @Composable
 fun SmallTagEditorPreview() {
     GraphNotesTheme {
-        SmallTagEditor(onEventInput = {})
+        SmallTagEditor(onEventInput = {}, onTextInput = {})
     }
 }

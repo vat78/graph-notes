@@ -1,5 +1,7 @@
 package ru.vat78.notes.clients.android.ui.screens.tags
 
+import android.util.Log
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.AppState
@@ -8,6 +10,7 @@ import ru.vat78.notes.clients.android.base.ListState
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.NotesFilter
+import ru.vat78.notes.clients.android.data.getWordsForSearch
 
 class TagsViewModel(
     private val appState: AppState,
@@ -25,10 +28,13 @@ class TagsViewModel(
     private val noteTypes
         get() = services.noteTypeStorage.types
 
+    private var stateBeforeFiltering: TagsUiState? = null
+
     override fun sendEvent(event: TagsUiEvent) {
         when (event) {
             is TagsUiEvent.LoadData -> loadData(event.type, event.tag, state.value)
             is TagsUiEvent.CreateTag -> createTag(event.type, event.caption, event.parent)
+            is TagsUiEvent.NewTextInput -> handleTextInput(state.value, event.textInput)
         }
     }
 
@@ -89,6 +95,30 @@ class TagsViewModel(
             text = text,
             parent = parent
         )
+    }
+
+    private fun handleTextInput(oldState: TagsUiState, textInput: TextFieldValue) {
+        if (textInput.text.length > 3) {
+            viewModelScope.launch {
+                val tagText = textInput.text
+                Log.i("TagsViewModel", "Search suggestions for simple text $tagText and tag type ${oldState.tagType}")
+                val suggestions = services.tagSearchService.searchTagSuggestions(
+                    words = getWordsForSearch(tagText),
+                    selectedType = oldState.tagType.id,
+                    excludedTypes = emptyList(),
+                    excludedTags = emptySet(),
+                    maxCount =  0
+                ).map { element -> Note(id = element.id, type = element.type, caption = element.caption, color = element.color) }
+                _state.emit(_state.value.copy(tags = suggestions, filtered = true))
+                if (!oldState.filtered) {
+                    stateBeforeFiltering = oldState
+                }
+            }
+        } else if (_state.value.filtered && stateBeforeFiltering != null) {
+            val state = stateBeforeFiltering!!.copy(filtered = false)
+            stateBeforeFiltering = null
+            _state.tryEmit(state)
+        }
     }
 
     private fun typesForFiltering(originType: NoteType, types: Collection<NoteType>) : List<String> = types.asSequence()

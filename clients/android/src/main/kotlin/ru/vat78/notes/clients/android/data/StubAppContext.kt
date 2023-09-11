@@ -126,7 +126,9 @@ class StubAppContext : AppStorage {
             override suspend fun searchTagSuggestions(
                 words: Set<String>,
                 excludedTypes: List<String>,
-                excludedTags: Set<String>
+                selectedType: String,
+                excludedTags: Set<String>,
+                maxCount: Int
             ): List<DictionaryElement> {
                 TODO("Not yet implemented")
             }

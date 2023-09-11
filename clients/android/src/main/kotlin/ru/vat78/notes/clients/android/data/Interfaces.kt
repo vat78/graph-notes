@@ -32,11 +32,13 @@ abstract class TagSearchService {
     abstract suspend fun searchTagSuggestions(
         words: Set<String>,
         excludedTypes: List<String>,
-        excludedTags: Set<String>): List<DictionaryElement>
+        selectedType: String,
+        excludedTags: Set<String>,
+        maxCount: Int): List<DictionaryElement>
 
     // ToDo: add filtering by time of availability of tags
     // ToDo: add statistics of usage of suggestions and ordering by it
-    suspend fun searchTagSuggestions(text: String, note: NoteWithParents): List<DictionaryElement> {
+    suspend fun searchTagSuggestions(text: String, note: NoteWithParents, maxCount: Int = 5): List<DictionaryElement> {
         val existingLinks = note.parents
         val excludedTags = existingLinks.map { it.id }.toSet() + note.note.id
         val excludedTypes = existingLinks.asSequence()
@@ -47,7 +49,7 @@ abstract class TagSearchService {
             .toList()
 
         val words = getWordsForSearch(text)
-        return searchTagSuggestions(words, excludedTypes, excludedTags)
+        return searchTagSuggestions(words, excludedTypes, "", excludedTags, maxCount)
     }
 
     abstract suspend fun deleteTagSuggestions(tokens: Set<String>, tagId: String)
