@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Note
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.StubAppContext
-import ru.vat78.notes.clients.android.data.TmpIcons
+import ru.vat78.notes.clients.android.data.getIcon
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 import java.time.format.DateTimeFormatter
 
@@ -56,7 +54,7 @@ fun NoteComponent(
             Column {
                 Row (modifier = Modifier.fillMaxWidth()) {
                     Icon(
-                        imageVector = TmpIcons[noteType?.icon] ?: Icons.Filled.Note,
+                        imageVector = getIcon(noteType),
                         contentDescription = null,
                         modifier = Modifier
                             .padding(start = 8.dp, top = 8.dp)
@@ -118,7 +116,7 @@ fun NoteComponent(
 fun NoteComponentPreview() {
     GraphNotesTheme {
         NoteComponent(
-            note = StubAppContext().loadNotes(null)[0],
+            note = StubAppContext().notes[0],
             noteType = null
         )
     }
@@ -133,7 +131,7 @@ fun NoteComponentPreviewDark() {
     GraphNotesTheme {
         GraphNotesTheme {
             NoteComponent(
-                note = StubAppContext().loadNotes(null)[0],
+                note = StubAppContext().notes[0],
                 noteType = null
             )
         }

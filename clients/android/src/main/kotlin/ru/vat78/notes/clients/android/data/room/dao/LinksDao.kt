@@ -17,6 +17,9 @@ interface LinksDao {
     @Query("SELECT * FROM links WHERE child = :child and deleted <> 1")
     fun getParents(child: String): List<LinkEntity>
 
+    @Query("SELECT l.* FROM links l JOIN notes n ON l.child = n.id AND n.typeId in (:types) WHERE l.parent in (:parents) and l.deleted <> 1")
+    fun getChildren(parents: Collection<String>, types: Collection<String>): List<LinkEntity>
+
     @Query("DELETE FROM links")
     fun cleanup(): Int
 

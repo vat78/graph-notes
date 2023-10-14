@@ -38,6 +38,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.AppEvent
 import ru.vat78.notes.clients.android.AppState
+import ru.vat78.notes.clients.android.data.NoteTypes
 import ru.vat78.notes.clients.android.firebase.auth.FirebaseAuthentication
 import ru.vat78.notes.clients.android.ui.components.PermissionDialog
 import ru.vat78.notes.clients.android.ui.components.RationaleDialog
@@ -90,7 +91,7 @@ fun GraphNotesApp() {
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
-                DrawerNavigationMenu({ appState.context.services.noteTypeStorage.types.values }) {
+                DrawerNavigationMenu({ NoteTypes.types.values }) {
                     appState.navigate(it)
                     Log.i("DrawerNavigationMenu", "Selected $it")
                     scope.launch {

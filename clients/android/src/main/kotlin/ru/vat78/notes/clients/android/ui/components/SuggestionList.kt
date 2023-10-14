@@ -13,9 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.runBlocking
 import ru.vat78.notes.clients.android.R
 import ru.vat78.notes.clients.android.data.DictionaryElement
-import ru.vat78.notes.clients.android.data.defaultTypes
+import ru.vat78.notes.clients.android.data.StubAppContext
+import ru.vat78.notes.clients.android.data.getIcon
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 
 @Composable
@@ -38,7 +40,7 @@ fun SuggestionList(
                     else suggestions[index].caption
                     TagRecord(
                         text = text,
-                        iconName = suggestions[index].type.icon,
+                        icon = getIcon(suggestions[index].type),
                         modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
                             .clickable { onSelectSuggestion.invoke(suggestions[index]) }
                     )
@@ -53,10 +55,11 @@ fun SuggestionList(
 @Preview
 @Composable
 fun SuggestionListPreview() {
+    val types = runBlocking { StubAppContext().noteTypeStorage.getTypes() }.toList()
     GraphNotesTheme {
         SuggestionList(
-            suggestions = listOf(DictionaryElement("", defaultTypes.get(0), "Test note for suggestion"),
-                DictionaryElement("", defaultTypes.get(0), "Test note for suggestion with very very very very very long text")),
+            suggestions = listOf(DictionaryElement("", types[0], "Test note for suggestion"),
+                DictionaryElement("", types[0], "Test note for suggestion with very very very very very long text")),
             modifier = Modifier.fillMaxWidth()
         )
     }

@@ -22,8 +22,6 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Note
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -58,12 +56,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.runBlocking
 import ru.vat78.notes.clients.android.R
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
 import ru.vat78.notes.clients.android.data.NoteWithParents
-import ru.vat78.notes.clients.android.data.TmpIcons
-import ru.vat78.notes.clients.android.data.defaultTypes
+import ru.vat78.notes.clients.android.data.StubAppContext
+import ru.vat78.notes.clients.android.data.getIcon
 import ru.vat78.notes.clients.android.ui.components.NewTagAlert
 import ru.vat78.notes.clients.android.ui.components.SymbolAnnotationType
 import ru.vat78.notes.clients.android.ui.components.TagArea
@@ -95,6 +94,7 @@ fun NoteEditForm(
         val newTag = uiState.newTag
         NewTagAlert(
             tag = newTag,
+            error = null,
             tagTypes = tagTypes,
             onDismiss = { sendEvent.invoke(NotesEditorUiEvent.CancelNewTag) },
             onConfirm = { sendEvent.invoke(NotesEditorUiEvent.CreateNewTag(it)) },
@@ -190,7 +190,7 @@ fun TypeAndCaption(
 
         Box(modifier = Modifier.align(Alignment.CenterVertically)) {
             Icon(
-                imageVector = TmpIcons[type.icon] ?: Icons.Filled.Note,
+                imageVector = getIcon(type),
                 contentDescription = type.name,
                 modifier = Modifier
                     .background(Color.Transparent)
@@ -209,7 +209,7 @@ fun TypeAndCaption(
                         },
                         leadingIcon = {
                             Icon(
-                                imageVector = TmpIcons[typeOption.icon] ?: Icons.Filled.Note,
+                                imageVector = getIcon(typeOption),
                                 contentDescription = typeOption.name,
                             )
                         },
@@ -412,8 +412,9 @@ fun TimeEditors(
 @Composable
 @Preview
 fun NoteEditFormPreview() {
+    val types = runBlocking { StubAppContext().noteTypeStorage.getTypes() }.toList()
     val note = Note(
-        type = defaultTypes.find { !it.tag }!!,
+        type = types.find { !it.tag }!!,
         caption = "Should not be visible",
         description = "Some test text. Some test text. Some test text. Some test text. "
     )
@@ -424,7 +425,7 @@ fun NoteEditFormPreview() {
                 origin = NoteWithParents(note, emptySet()),
                 changed = NoteWithParents(note, emptySet()),
                 noteType = note.type,
-                availableTypes = defaultTypes,
+                availableTypes = types,
                 status = EditFormState.NEW,
                 descriptionFocus = DescriptionFocusState.SHOW,
                 descriptionTextValue = TextFieldValue(note.description)

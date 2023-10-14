@@ -14,16 +14,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.data.SortingType
 import ru.vat78.notes.clients.android.ui.components.NoteListComponent
 import ru.vat78.notes.clients.android.ui.components.SmallNoteEditor
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 
 @Composable
 fun NoteListView(
-    notes: List<Note>,
+    notes: Collection<Note>,
     suggestions: List<DictionaryElement>,
     scrollState: LazyListState,
     textState: TextFieldValue,
+    sortingType: SortingType,
     modifier: Modifier = Modifier,
     onNoteClick: (Note) -> Unit = { },
     onCreateNote: (String) -> Unit = { },
@@ -34,7 +36,8 @@ fun NoteListView(
     val scope = rememberCoroutineScope()
     Column(modifier = modifier) {
         NoteListComponent(
-            notes,
+            notes = notes,
+            sortingType = sortingType,
             modifier = Modifier.weight(1f),
             scrollState = scrollState,
             onNoteClick = onNoteClick,
@@ -68,6 +71,7 @@ fun NoteListViewPreview() {
                 Note(caption = "test 1"),
                 Note(caption = "test 2")
             ),
+            sortingType = SortingType.FINISH_TIME_DESC,
             suggestions = emptyList(),
             scrollState = scrollState,
             textState = TextFieldValue("")
@@ -85,6 +89,7 @@ fun NoteListViewPreviewDark() {
     GraphNotesTheme {
         NoteListView(
             notes = emptyList(),
+            sortingType = SortingType.FINISH_TIME_DESC,
             suggestions = emptyList(),
             scrollState = scrollState,
             textState = TextFieldValue("")

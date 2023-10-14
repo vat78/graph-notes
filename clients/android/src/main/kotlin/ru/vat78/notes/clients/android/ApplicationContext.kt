@@ -15,16 +15,17 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.plus
-import ru.vat78.notes.clients.android.data.AppStorage
+import ru.vat78.notes.clients.android.data.ExternalStorage
+import ru.vat78.notes.clients.android.data.GlobalEventHandler
+import ru.vat78.notes.clients.android.data.TypeSyncEvent
 import ru.vat78.notes.clients.android.data.User
-import ru.vat78.notes.clients.android.data.defaultTypes
 import ru.vat78.notes.clients.android.data.room.RoomContext
 import ru.vat78.notes.clients.android.data.syncData
 import ru.vat78.notes.clients.android.firebase.firestore.FirestoreContext
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
-private var externalStorage: AppStorage? = null
+private var externalStorage: ExternalStorage? = null
 private val _services : RoomContext = RoomContext()
 
 class ApplicationContext {
@@ -63,22 +64,11 @@ class ApplicationContext {
             workManager.cancelUniqueWork("SYNC")
             return
         }
-        reloadTypes()
+        GlobalEventHandler.sendEvent(TypeSyncEvent(services.NoteTypeRepository(), externalStorage!!.noteTypeStorage))
         val syncRequest = PeriodicWorkRequestBuilder<SyncWorker>(5, TimeUnit.MINUTES)
             .setConstraints(constraints)
             .build()
         workManager.enqueueUniquePeriodicWork("SYNC", ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, syncRequest)
-    }
-
-    private suspend fun reloadTypes() {
-        externalStorage!!.noteTypeStorage.reload()
-        val types = externalStorage!!.noteTypeStorage.types.values
-        Log.i("Application context", "Types from external $types")
-        if (types.isEmpty()) {
-            services.syncTypes(defaultTypes)
-        } else {
-            services.syncTypes(types)
-        }
     }
 }
 

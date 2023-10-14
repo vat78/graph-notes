@@ -4,14 +4,19 @@ import android.content.res.Resources
 import androidx.compose.material3.SnackbarHostState
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.CoroutineScope
+import ru.vat78.notes.clients.android.data.GlobalEventHandler
 
 class AppState(
     val snackbarHostState: SnackbarHostState,
     val navController: NavHostController,
     private val resources: Resources,
-    val coroutineScope: CoroutineScope,
+    private val coroutineScope: CoroutineScope,
     val context:ApplicationContext = ApplicationContext()
 ) {
+
+    init {
+        GlobalEventHandler.init()
+    }
 
     fun popUp() {
         navController.popBackStack()

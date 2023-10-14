@@ -32,9 +32,9 @@ fun GraphNotesNavHost(
         modifier = modifier
     ) {
 
-        val toNoteEditAction: (Note) -> Unit = { note ->
+        val toNoteEditAction: (String) -> Unit = { noteId ->
             appState.navigate(
-                route = "${EditNoteScreen.route}/${note.id}"
+                route = "${EditNoteScreen.route}/${noteId}"
             )
         }
         val toNewNoteEditAction: () -> Unit = {
@@ -47,7 +47,7 @@ fun GraphNotesNavHost(
             Log.i("GraphNotesNavHost", "Route to ${NoteListScreen.route}")
             TimeLineScreen(
                 appState = appState,
-                onNoteClick = toNoteEditAction,
+                onNoteClick = { note -> toNoteEditAction.invoke(note.id) },
                 onCreateNote = toNewNoteEditAction,
                 onNavIconPressed = onNavIconPressed
             )
@@ -101,7 +101,7 @@ fun GraphNotesNavHost(
                     }
                 },
                 onCreateNote = toNewNoteEditAction,
-                onCaptionClick = toNoteEditAction,
+                onCaptionClick = { note -> toNoteEditAction.invoke(note.id) },
                 onNavIconPressed = onNavIconPressed
             )
         }
@@ -120,9 +120,9 @@ fun GraphNotesNavHost(
             TagNotes(
                 rootId  = rootId!!,
                 appState = appState,
-                onNoteClick = toNoteEditAction,
+                onNoteClick = { note -> toNoteEditAction.invoke(note.id) },
                 onCreateNote = toNewNoteEditAction,
-                onCaptionClick = toNoteEditAction,
+                onCaptionClick = { note -> toNoteEditAction.invoke(note.id) },
                 onNavIconPressed = onNavIconPressed
             )
         }

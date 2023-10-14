@@ -2,13 +2,15 @@ package ru.vat78.notes.clients.android.data.room.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
 import ru.vat78.notes.clients.android.data.room.entity.WordEntity
 
 @Dao
 interface WordDao {
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(vararg words: WordEntity)
 
     @Delete

@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -31,9 +32,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.runBlocking
 import ru.vat78.notes.clients.android.data.DictionaryElement
-import ru.vat78.notes.clients.android.data.TmpIcons
-import ru.vat78.notes.clients.android.data.defaultTypes
+import ru.vat78.notes.clients.android.data.StubAppContext
+import ru.vat78.notes.clients.android.data.getIcon
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 import java.util.*
 
@@ -151,7 +153,7 @@ fun TagTable(
                    ) {
                        TagRecord(
                            text = text,
-                           iconName = tag.type.icon,
+                           icon = getIcon(tag.type),
                            modifier = Modifier.background(Color.Transparent)
                        )
                    }
@@ -164,11 +166,10 @@ fun TagTable(
 @Composable
 fun TagRecord(
     text: String,
-    iconName: String,
+    icon: ImageVector?,
     modifier: Modifier = Modifier
 ) {
     Row (modifier = modifier) {
-        val icon = TmpIcons[iconName]
         if (icon != null) {
             Icon(
                 imageVector = icon,
@@ -202,16 +203,17 @@ private fun cutText(text: String, maxLength: Int): String {
 @ExperimentalFoundationApi
 @Composable
 fun ViewTagArea() {
+    val types = runBlocking { StubAppContext().noteTypeStorage.getTypes() }.toList()
     GraphNotesTheme {
         TagArea(
-            tags = setOf(DictionaryElement(id = "1", type = defaultTypes[1], caption = "test 1"),
-                DictionaryElement(id = "2", type = defaultTypes[2], caption = "test 2"),
-                DictionaryElement(id = "3", type = defaultTypes[1], caption = "test 3", color = Color.Red),
-                DictionaryElement(id = "4", type = defaultTypes[1], caption = "test with very long long long 3", color = Color.Red),
-                DictionaryElement(id = "5", type = defaultTypes[1], caption = "test with very long long long long long", color = Color.Red),
-                DictionaryElement(id = "6", type = defaultTypes[1], caption = "test with very long long long long long log long long text"),
-                DictionaryElement(id = "7", type = defaultTypes[1], caption = "test 1111111"),
-                DictionaryElement(id = "8", type = defaultTypes[1], caption = "test 22222222222")
+            tags = setOf(DictionaryElement(id = "1", type = types[1], caption = "test 1"),
+                DictionaryElement(id = "2", type = types[2], caption = "test 2"),
+                DictionaryElement(id = "3", type = types[1], caption = "test 3", color = Color.Red),
+                DictionaryElement(id = "4", type = types[1], caption = "test with very long long long 3", color = Color.Red),
+                DictionaryElement(id = "5", type = types[1], caption = "test with very long long long long long", color = Color.Red),
+                DictionaryElement(id = "6", type = types[1], caption = "test with very long long long long long log long long text"),
+                DictionaryElement(id = "7", type = types[1], caption = "test 1111111"),
+                DictionaryElement(id = "8", type = types[1], caption = "test 22222222222")
             ),
             modifier = Modifier.background(Color.Gray)
         )

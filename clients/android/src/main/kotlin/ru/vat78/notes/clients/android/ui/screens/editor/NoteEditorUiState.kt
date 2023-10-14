@@ -13,7 +13,8 @@ enum class EditFormState {
     NEW,
     LOADED,
     CHANGED,
-    CLOSED
+    CLOSED,
+    ERROR
 }
 
 enum class DescriptionFocusState {
@@ -32,7 +33,8 @@ data class NoteEditorUiState(
     val descriptionFocus: DescriptionFocusState,
     val descriptionTextValue: TextFieldValue,
     val suggestions: List<DictionaryElement> = emptyList(),
-    val newTag: DictionaryElement? = null
+    val newTag: DictionaryElement? = null,
+    val errorMessage: Int? = null
 ) : UiState
 
 sealed class NotesEditorUiEvent: UiEvent {
@@ -44,9 +46,9 @@ sealed class NotesEditorUiEvent: UiEvent {
         val uuid: String
     ): NotesEditorUiEvent()
 
-    data class SaveNote(
-        val isNew: Boolean
-    ): NotesEditorUiEvent()
+    object SaveNote: NotesEditorUiEvent()
+
+    object CancelError: NotesEditorUiEvent()
 
     object CancelChanges: NotesEditorUiEvent()
 

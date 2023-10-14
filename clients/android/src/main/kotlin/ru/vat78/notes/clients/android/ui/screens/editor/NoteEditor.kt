@@ -20,10 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.R
+import ru.vat78.notes.clients.android.data.NoteTypes
 import ru.vat78.notes.clients.android.ui.TagNotesScreen
+import ru.vat78.notes.clients.android.ui.components.ErrorMessage
 import ru.vat78.notes.clients.android.ui.components.SuggestionList
 import ru.vat78.notes.clients.android.ui.screens.editor.views.NoteEditForm
 
@@ -53,7 +56,7 @@ fun NoteEditor(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    viewModel.sendEvent(NotesEditorUiEvent.SaveNote(noteUuid == "new"))
+                    viewModel.sendEvent(NotesEditorUiEvent.SaveNote)
                 }
             ) {
                 Text(text = "Save")
@@ -81,11 +84,18 @@ fun NoteEditor(
                 }
             )
         }
+        if (uiState.status == EditFormState.ERROR) {
+            Dialog(
+                onDismissRequest = { viewModel.sendEvent(NotesEditorUiEvent.CancelError) }
+            ) {
+                ErrorMessage(stringResource(uiState.errorMessage ?: R.string.unknown_error))
+            }
+        }
         Box(Modifier.fillMaxSize()) {
             NoteEditForm(
                 uiState = uiState,
                 sendEvent = viewModel::sendEvent,
-                tagTypes = viewModel.noteTypes.values.filter { it.tag && !it.hierarchical },
+                tagTypes = NoteTypes.types.values.filter { it.tag && !it.hierarchical },
                 modifier = Modifier.padding(it),
                 onTagClick = {id -> appState.navigate("${TagNotesScreen.route}/$id")}
             )

@@ -121,7 +121,7 @@ fun TagListComponentPreview() {
     GraphNotesTheme {
         Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             TagListComponent(
-                notes = StubAppContext().loadNotes(null).sortedBy { it.caption },
+                notes = StubAppContext().notes.sortedBy { it.caption },
                 scrollState = scrollState
             )
         }
@@ -138,7 +138,7 @@ fun TagListComponentPreviewDark() {
     GraphNotesTheme {
         Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             TagListComponent(
-                notes = StubAppContext().loadNotes(null).sortedBy { it.caption },
+                notes = StubAppContext().notes.sortedBy { it.caption },
                 scrollState = scrollState
             )
         }

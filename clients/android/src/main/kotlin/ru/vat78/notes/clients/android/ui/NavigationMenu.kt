@@ -34,7 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ru.vat78.notes.clients.android.R
 import ru.vat78.notes.clients.android.data.NoteType
-import ru.vat78.notes.clients.android.data.TmpIcons
+import ru.vat78.notes.clients.android.data.getIcon
 
 @Composable
 @ExperimentalMaterial3Api
@@ -55,7 +55,7 @@ fun DrawerNavigationMenu(
                 .sortedBy { it.name }
                 .forEach { type ->
                     MenuItem(
-                        TmpIcons[type.icon] ?: Icons.Filled.Note,
+                        getIcon(type),
                         type.name, false
                     ) { onClickNavigate("${TagListScreen.route}/${type.id}") }
             }

@@ -35,6 +35,14 @@
     <string name="save_alert_cancel_button">Cancel</string>
     <string name="tags_input_hint">Enter tag name</string>
 
+    <string name="unknown_error">Unexpected error</string>
+    <string name="tag_error_empty_caption">Tag caption can\'t be empty</string>
+    <string name="tag_error_already_exist">Tag with this caption already exists</string>
+    <string name="note_error_empty_text">Note should contain text</string>
+    <string name="tag_error_wrong_type">Wrong type of the tag</string>
+
+    <string name="cant_save_this">Can\'t save this tag.</string>
+
     <!-- Create new tag -->
     <string name="new_tag_alert_title">Create new tag?</string>
     <string name="new_tag_confirm_button">Create</string>

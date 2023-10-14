@@ -36,8 +36,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.runBlocking
 import ru.vat78.notes.clients.android.data.DictionaryElement
-import ru.vat78.notes.clients.android.data.defaultTypes
+import ru.vat78.notes.clients.android.data.StubAppContext
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
 import java.util.UUID
 
@@ -201,9 +202,10 @@ private fun buildTagLink(matchResult: MatchResult, tags: Map<String, DictionaryE
 @Composable
 fun MessageFormatterPreview() {
     val uniqueId = UUID.randomUUID().toString()
+    val types = runBlocking { StubAppContext().noteTypeStorage.getTypes() }.toList()
     val tags = mapOf(
-        Pair("467c41ed-67fa-4a7d-82e0-6d2fa87459ac", DictionaryElement("467c41ed-67fa-4a7d-82e0-6d2fa87459ac", defaultTypes[1], "test tag 1")),
-        Pair(uniqueId, DictionaryElement(uniqueId, defaultTypes[2], "test tag 2"))
+        Pair("467c41ed-67fa-4a7d-82e0-6d2fa87459ac", DictionaryElement("467c41ed-67fa-4a7d-82e0-6d2fa87459ac", types[0], "test tag 1")),
+        Pair(uniqueId, DictionaryElement(uniqueId, types[1], "test tag 2"))
     )
     GraphNotesTheme {
         val styledMessage = messageFormatter("""

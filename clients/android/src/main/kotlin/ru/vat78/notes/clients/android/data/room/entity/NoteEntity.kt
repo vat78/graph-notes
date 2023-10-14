@@ -7,6 +7,8 @@ import androidx.room.PrimaryKey
 import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.data.NoteType
+import ru.vat78.notes.clients.android.data.NoteTypes
+import ru.vat78.notes.clients.android.ui.screens.editor.NoteEditorUiState
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.util.*
@@ -44,10 +46,10 @@ data class NoteEntity(
         suggestions = note.textInsertions.entries.map { "${it.key}|${it.value.caption}" }.joinToString("|")
     )
 
-    fun toNote(types: Map<String, NoteType>) : Note {
+    fun toNote() : Note {
         return Note(
             id = id,
-            type = types[typeId]!!,
+            type = NoteTypes.getNoteTypeById(typeId),
             caption = caption ?: "",
             description = description ?: "",
             color = Color(color),
@@ -60,10 +62,10 @@ data class NoteEntity(
         )
     }
 
-    fun toDictionary(types: Map<String, NoteType>) : DictionaryElement {
+    fun toDictionary() : DictionaryElement {
         return DictionaryElement(
             id = id,
-            type = types[typeId]!!,
+            type = NoteTypes.getNoteTypeById(typeId),
             caption = caption ?: "",
             color = Color(color)
         )
@@ -79,5 +81,20 @@ data class NoteEntity(
             result[list[i]] = DictionaryElement(id =list[i], type = NoteType(), caption = list[i+1])
         }
         return result
+    }
+
+    /**
+     * Moved it from [Note] because it broke flow of [NoteEditorUiState] changes.
+     * Don't remember why I overrode these methods previously.
+      */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is NoteEntity) return false
+
+        return (id == other.id)
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
     }
 }

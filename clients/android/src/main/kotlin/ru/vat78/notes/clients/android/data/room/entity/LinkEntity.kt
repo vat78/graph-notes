@@ -19,4 +19,13 @@ data class LinkEntity(
         deleted = link.deleted,
         lastUpdate = if (cleanLastUpdate) 0 else Instant.now().epochSecond
     )
+
+    fun toNoteLink() : NoteLink {
+        return NoteLink(
+            parentId = parent,
+            childId = child,
+            deleted = deleted,
+            lastUpdate = lastUpdate
+        )
+    }
 }

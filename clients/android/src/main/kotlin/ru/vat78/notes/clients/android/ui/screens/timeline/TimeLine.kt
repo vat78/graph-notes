@@ -20,9 +20,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.vat78.notes.clients.android.AppState
 import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.data.NoteTypes
 import ru.vat78.notes.clients.android.ui.TagNotesScreen
 import ru.vat78.notes.clients.android.ui.components.NewTagAlert
 import ru.vat78.notes.clients.android.ui.screens.timeline.views.NoteListView
@@ -36,7 +38,7 @@ fun TimeLineScreen(
     onNoteClick: (Note) -> Unit = { },
     onCreateNote: () -> Unit = { },
 ) {
-    val viewModel = viewModel { TimeLineViewModel(appState) }
+    val viewModel = viewModel { NoteListViewModel(appState) }
     val uiState by viewModel.state.collectAsState()
     val snackbarHostState = remember { appState.snackbarHostState }
     val scrollState = rememberLazyListState()
@@ -47,10 +49,11 @@ fun TimeLineScreen(
         val newTag = uiState.newTag!!
         NewTagAlert(
             tag = newTag,
-            tagTypes = viewModel.noteTypes.values.filter { it.tag && !it.hierarchical },
-            onDismiss = { viewModel.sendEvent(TimeLineEvent.CancelNewTag) },
-            onConfirm = { viewModel.sendEvent(TimeLineEvent.CreateNewTag(it)) },
-            onChangeType = { viewModel.sendEvent(TimeLineEvent.ChangeNewTagType(newTag, it)) }
+            error = uiState.error?.let { stringResource(it) },
+            tagTypes = NoteTypes.types.values.filter { it.tag && !it.hierarchical },
+            onDismiss = { viewModel.sendEvent(NoteListEvent.CancelNewTag) },
+            onConfirm = { viewModel.sendEvent(NoteListEvent.CreateNewTag(it)) },
+            onChangeType = { viewModel.sendEvent(NoteListEvent.ChangeNewTagType(newTag, it)) }
         )
     }
     Scaffold (
@@ -73,21 +76,22 @@ fun TimeLineScreen(
                 notes = uiState.notes,
                 suggestions = uiState.suggestions,
                 scrollState = scrollState,
+                sortingType = uiState.sortingType,
                 modifier = Modifier.fillMaxSize().padding(padding),
                 onNoteClick = onNoteClick,
                 onCreateNote = { content ->
-                    viewModel.sendEvent(TimeLineEvent.CreateNote(text = content))
+                    viewModel.sendEvent(NoteListEvent.CreateNote(text = content))
                     onCreateNote()
                 },
                 onTagClick = {id -> appState.navigate("${TagNotesScreen.route}/$id")},
                 textState = uiState.inputValue,
-                onTextInput = { newInput -> viewModel.sendEvent(TimeLineEvent.NewTextInput(newInput)) },
-                onSelectSuggestion = { tag -> viewModel.sendEvent(TimeLineEvent.SelectSuggestion(tag)) }
+                onTextInput = { newInput -> viewModel.sendEvent(NoteListEvent.NewTextInput(newInput)) },
+                onSelectSuggestion = { tag -> viewModel.sendEvent(NoteListEvent.SelectSuggestion(tag)) }
             )
         }
     )
 
     LaunchedEffect(viewModel) {
-        viewModel.sendEvent(TimeLineEvent.LoadNotes(true))
+        viewModel.sendEvent(NoteListEvent.LoadNotes)
     }
 }

@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.vat78.notes.clients.android.AppState
+import ru.vat78.notes.clients.android.data.DictionaryElement
 import ru.vat78.notes.clients.android.data.Note
 import ru.vat78.notes.clients.android.ui.NoteListScreen
 import ru.vat78.notes.clients.android.ui.TagNotesScreen
@@ -39,7 +40,7 @@ fun Tags(
     rootId: String?,
     appState: AppState,
     onNavIconPressed: () -> Unit = { },
-    onCaptionClick: (Note) -> Unit = { },
+    onCaptionClick: (DictionaryElement) -> Unit = { },
     onNoteClick: (Note) -> Unit = { },
     onCreateNote: () -> Unit = { },
 ) {

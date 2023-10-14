@@ -42,13 +42,13 @@ class UserRepository(
         }
     }
 
-    override suspend fun saveLastSyncTimestamp(userId: String, deviceId: String, timestamp: Long) {
+    override suspend fun saveLastSyncTimestamp(userId: String, deviceId: String, timestamp: Long, stats: Map<String, Int>) {
         withContext(Dispatchers.IO) {
             firestore.collection(USER_COLLECTION)
                 .document(userId)
                 .collection(SYNC_HISTORY_COLLECTION)
                 .document(deviceId + timestamp)
-                .set(mapOf("deviceId" to deviceId, "timestamp" to timestamp))
+                .set(mapOf("deviceId" to deviceId, "timestamp" to timestamp) + stats)
         }
     }
 

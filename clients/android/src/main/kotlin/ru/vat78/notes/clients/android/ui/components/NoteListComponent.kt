@@ -29,16 +29,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.vat78.notes.clients.android.data.Note
+import ru.vat78.notes.clients.android.data.SortingType
 import ru.vat78.notes.clients.android.data.StubAppContext
 import ru.vat78.notes.clients.android.ui.theme.GraphNotesTheme
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 
 @Composable
 fun NoteListComponent(
-    notes: List<Note>,
+    notes: Collection<Note>,
     scrollState: LazyListState,
+    sortingType: SortingType,
     modifier: Modifier = Modifier,
     onNoteClick: (Note) -> Unit = { },
     onTagClick: (String) -> Unit = { }
@@ -53,17 +53,16 @@ fun NoteListComponent(
             modifier = Modifier
                 .fillMaxSize()
         ){
-            for (index in notes.indices) {
-                val content = notes[index]
-                val curDate = content.finish.toLocalDate()
-
-                if (index > 0) {
-                    val prevDate = notes[index - 1].finish.toLocalDate()
-                    if (curDate != prevDate) {
+            var prevGroup = ""
+            notes.forEach {content ->
+                val currentGroup = sortingType.groupFunction.invoke(content)
+                if (prevGroup != currentGroup) {
+                    if (prevGroup.isNotBlank()) {
                         item {
-                            DayHeader(prevDate)
+                            GroupHeader(prevGroup)
                         }
                     }
+                    prevGroup = currentGroup
                 }
 
                 item {
@@ -103,16 +102,15 @@ fun NoteListComponent(
 
 
 @Composable
-fun DayHeader(day: LocalDate) {
+fun GroupHeader(groupName: String) {
     Row(
         modifier = Modifier
             .padding(vertical = 8.dp, horizontal = 16.dp)
             .height(16.dp)
     ) {
-        val dayString = if (day == LocalDate.now()) "Today" else day.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
         SectionHeaderLine()
         Text(
-            text = dayString,
+            text = groupName,
             modifier = Modifier.padding(horizontal = 16.dp),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -127,11 +125,13 @@ private val JumpToBottomThreshold = 56.dp
 @Composable
 fun NoteListComponentPreview() {
     val scrollState = rememberLazyListState()
+    val context = StubAppContext()
     GraphNotesTheme {
         Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             NoteListComponent(
-                notes = StubAppContext().loadNotes(null).sortedBy { it.finish },
-                scrollState = scrollState
+                notes = context.notes.sortedBy { it.finish },
+                scrollState = scrollState,
+                sortingType = SortingType.FINISH_TIME_DESC
             )
         }
     }
@@ -144,11 +144,13 @@ fun NoteListComponentPreview() {
 @Composable
 fun NoteListComponentPreviewDark() {
     val scrollState = rememberLazyListState()
+    val context = StubAppContext()
     GraphNotesTheme {
         Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             NoteListComponent(
-                notes = StubAppContext().loadNotes(null).sortedBy { it.finish },
-                scrollState = scrollState
+                notes = context.notes.sortedBy { it.finish },
+                scrollState = scrollState,
+                sortingType = SortingType.FINISH_TIME_DESC
             )
         }
     }
